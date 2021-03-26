@@ -25,8 +25,9 @@ contract Foodiez {
     
     uint NetworkServiceFee = 2;
     uint DeliveryFlatFee = 2;
-    
+
     event UserRegisteredEvent(string userName, bool isRegistered);
+    event UserInfoEvent(string name, address usrAddress, string usrType, uint256 rating);
     event RestaurantRegistered(string restaurantName, address rAddress, bool isRegistered);
     event ItemAddedEvent(string restaurantId, string itemId, string itemName);
     event OrderPlaced(string orderId, uint total, string orderStatus);
@@ -108,7 +109,7 @@ contract Foodiez {
     }
     
     /*****************Registration of User ( customer and delivery ) and Restaurant *********************/
-    function userRegister(string memory name, uint uType, uint256 amountStake) public payable {
+    function userRegister(string memory name, uint uType, uint256 amountStake) public payable returns(bool isSuccess){
         if(uType == 1) { 
             require(msg.value >= 10 ether, "Delivery Agent must stake minimum 10 ether"); 
         }
@@ -121,10 +122,13 @@ contract Foodiez {
         
         bool isRegistered = _foodiezRegistration.userRegistration(msg.sender, name, uType); // setup token here
         emit UserRegisteredEvent( name, isRegistered);
+        return isRegistered;
     }
     
-    function getUserInfo(address _address) public view returns (string memory, address, string memory, uint){
+    function getUserInfo(address _address) public view returns (string memory usrName, address usrAddress, string memory usrType, uint256 rating){
+        
         return _foodiezRegistration.getUserInfo(_address);
+        
     }
     
     function registerRestaurant(string memory _name, string memory _rId, uint256 amountStake) public payable{
@@ -144,16 +148,16 @@ contract Foodiez {
         emit ItemAddedEvent(rId, uniqueId, itemName);
     }
     
-    function getRestaurantMenu(address _restaurantAddress, uint _itemNumber) public view returns(string memory, string memory, uint){
+    function getRestaurantMenu(address _restaurantAddress, uint _itemNumber) public view returns(string memory itemName, string memory itemType, uint256 itemPrice){
         return _foodiezRegistration.getRestaurantMenu(_restaurantAddress, _itemNumber);
     } 
     
-    function getrestaurantInfo(address _restaurantAddress) public view returns(string memory, address, uint, uint){
+    function getrestaurantInfo(address _restaurantAddress) public view returns(string memory rId, address rAddress, uint256 rItems, uint256 rating){
         return _foodiezRegistration.getrestaurantInfo(_restaurantAddress);
     }
     
     /************Foodiez Orders Vars and Functions**********************/
-    function placeOrder(address _restaurantAddress, uint _itemNum, uint tokenPay) public payable returns (string memory, string memory, uint256, string memory){
+    function placeOrder(address _restaurantAddress, uint _itemNum, uint tokenPay) public payable returns (string memory uOrderId, string memory orderItemName, uint256 orderTotal, string memory orderStatus){
         
         (string memory rId, address restaurantAddress, string memory itemName, uint totalPrice) = _foodiezRegistration.getOrderTotal(msg.sender, _restaurantAddress, _itemNum);
         
@@ -171,7 +175,7 @@ contract Foodiez {
         return (uniqueId, oItemName, total, status);
     }
     
-    function getOrderStatus(string memory userOrderId) public view returns (string memory, address, address, string memory, uint256, string memory){
+    function getOrderStatus(string memory userOrderId) public view returns (string memory orderId, address userAddress, address driverAddress, string memory items, uint256 total, string memory status){
         return _foodiezOrders.getUserOrderStatus(userOrderId);
     }
     

@@ -33,7 +33,7 @@ contract FoodiezRegistration {
         string name;
         address userID;
         UserType usrType;
-        uint rating;
+        uint256 rating;
         uint256 tokens;
         bool isRegistered;
     }
@@ -100,7 +100,7 @@ contract FoodiezRegistration {
     }
     
     /************Address setters for helper / order contracts *************************************************/
-    function setParentContract(address _address) public OnlyOwner returns(string memory) {
+    function setParentContract(address _address) public returns(string memory) {
         require(isParentContractSet == false,"Foodiez Registration - Parent already set. Cannot be Changed");
         parentContractAddress = _address;
         isParentContractSet = true;
@@ -129,7 +129,7 @@ contract FoodiezRegistration {
         return true;
      }
      
-    function getUserInfo(address _address) public OnlyParent view returns(string memory, address, string memory, uint ){
+    function getUserInfo(address _address) public OnlyParent view returns(string memory, address, string memory, uint256 ){
         require(isUserRegistered(_address) == true, "User data not found! ");
         
         User memory usr = registeredUserMapping[_address];
@@ -176,7 +176,7 @@ contract FoodiezRegistration {
         return (rest.rId, uniqueId, _itemName);
     }
     
-    function getRestaurantMenu(address _restaurantAddress, uint _itemNumber) public OnlyParent view returns(string memory, string memory, uint){
+    function getRestaurantMenu(address _restaurantAddress, uint _itemNumber) public OnlyParent view returns(string memory, string memory, uint256){
         require(isRestaurantRegistered(_restaurantAddress) == true, "Restaurant is not registered.");
         
         Restaurant memory rest = RestaurantMapping[_restaurantAddress];
@@ -188,7 +188,7 @@ contract FoodiezRegistration {
         
     }
     
-    function getrestaurantInfo(address _restaurantAddress) public OnlyParent view returns(string memory, address, uint, uint){
+    function getrestaurantInfo(address _restaurantAddress) public OnlyParent view returns(string memory, address, uint256, uint256){
         require(isRestaurantRegistered(_restaurantAddress) == true, "Restaurant is not registered.");
         
         Restaurant memory rest = RestaurantMapping[_restaurantAddress];

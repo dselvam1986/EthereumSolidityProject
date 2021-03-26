@@ -23,66 +23,84 @@ contract('FoodiezTest', (accounts) => {
 
         // approve foodz to allow transfer of tokens
         token.approve(foodz.address, 100, { from: FoodzAccount });
-
-
-
     });
 
     it("should register a new customer from userAccount", async () => {
         let responce = await foodz.userRegister("Dino Sel", 0, 0, { from: userAccount });
-
-        // truffleAssert.eventEmitted(responce, 'User Registered', (ev) => {
-        //     return ev == true;
-        // });
 
         // now retrieve the data. 
         var expectedName = "Dino Sel";
         var expectedUsrType = "Customer";
         var expectedRating = 0;
 
-        let result = await foodz.getUserInfo({ from: userAccount, value: 0 });
+        let { usrName, usrAddress, usrType, rating } = await foodz.getUserInfo(userAccount);
 
-        // truffleAssert.eventEmitted(result, 'User Registered', (ev) => {
-        //     return ev.name === expectedName && ev.usrType === expectedUsrType && ev.rating === expectedRating;
+        // console.log(usrName, usrAddress, usrType, rating);
+        assert.equal(usrName, expectedName, "User name should be Dino Sel");
+        assert.equal(usrType, expectedUsrType, "User type should be Customer");
+        assert.equal(rating.toNumber(), expectedRating, "User rating should be 0");
+        // truffleAssert.eventEmitted(responce, "User registered", (ev)=>{
+        //     return ev.usrName == expectedName && ev.usrType == expectedUsrType;
         // });
+
     });
 
     it("should register a new driver from driverAccount", async () => {
         let responce = await foodz.userRegister("John Ang", 1, 10, { from: driverAccount, value: web3.utils.toWei('10', 'ether') });
 
-        // truffleAssert.eventEmitted(responce, 'Driver Registered', (ev) => {
-        //     return ev == true;
-        // });
-
         // // now retrieve the data. 
-        // var expectedName = "John Ang";
-        // var expectedUsrType = "Driver";
-        // var expectedRating = 0;
+        var expectedName = "John Ang";
+        var expectedUsrType = "Delivery";
+        var expectedRating = 0;
 
-        // let result = foodz.getUserInfo({ from: driverAccount});
+        let { usrName, usrAddress, usrType, rating } = await foodz.getUserInfo(driverAccount);
 
-        // truffleAssert.eventEmitted(result, 'User Registered', (ev) => {
-        //     return ev.name === expectedName && ev.usrType === expectedUsrType && ev.rating === expectedRating;
-        // });
+        // console.log(usrName, usrAddress, usrType, rating);
+        assert.equal(usrName, expectedName, "Driver name should be John Ang");
+        assert.equal(usrType, expectedUsrType, "User type should be Delivery");
+        assert.equal(rating.toNumber(), expectedRating, "Driver rating should be 0");
     });
 
     it("should register a new restaurant", async () => {
         let responce = await foodz.registerRestaurant("Shakti Restaurant", "shakti", 10, { from: restaurantAccount, value: web3.utils.toWei('10', 'ether') });
 
-        // truffleAssert.eventEmitted(responce, 'Restaurant Registered', (ev) => {
-        //     return ev == true;
-        // });
-
         // now retrieve the data. 
-        // var expectedName = "John Ang";
-        // var expectedUsrType = "Driver";
-        // var expectedRating = 0;
+        let { rId, rAddress, rItems, rating } = await foodz.getrestaurantInfo(restaurantAccount);
+        assert.equal(rId, "shakti", "Restaurant Id not matching");
+        assert.equal(rating.toNumber(), 0, "Restaurant rating should be 0");
+    });
 
-        // let result = foodz.getUserInfo({ from: driverAccount });
+    it("should add item to restaurant", async () => {
+        let responce = await foodz.addMenuItems("Chicken Sixty Five", 0, 3, { from: restaurantAccount });
 
-        // truffleAssert.eventEmitted(result, 'User Registered', (ev) => {
-        //     return ev.name === expectedName && ev.usrType === expectedUsrType && ev.rating === expectedRating;
-        // });
+        // now retrieve the data. 3000000000000000000
+        let result = await foodz.getRestaurantMenu(restaurantAccount, 0);
+        // console.log(result);
+
+        let { itemName, itemType, itemPrice } = await foodz.getRestaurantMenu(restaurantAccount, 0);
+        assert.equal(itemName, "Chicken Sixty Five", "Item name is not matching");
+        assert.equal(itemType, "Appetizer", "Item type is not matching");
+        // assert.equal(itemPrice.toNumber(), 3, "Item price is not matching");
+    });
+
+    // placing orders
+
+    it("customer should be able to place an order", async () => {
+        // let { uOrderId, orderItemName, orderTotal, orderStatus } = await foodz.placeOrder(restaurantAccount, 0, 0, { from: userAccount, value: 3});
+
+        let responce = await foodz.placeOrder(restaurantAccount, 0, 0, { from: userAccount, value: 3 });
+
+        // console.log(responce.logs[0].args);
+        let uniqueId = responce.logs[0].args.orderId;
+        let utotal = responce.logs[0].args.total.toNumber();
+        let ustatus = responce.logs[0].args.orderStatus;
+
+        // now retrieve the data. 3000000000000000000
+        let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(uniqueId);
+
+        assert.equal(orderId, uniqueId, "Order ids do not match");
+        assert.equal(total.toNumber(), utotal, "Order total is not matching");
+        assert.equal(status, ustatus, "Order status is not matching");
     });
 
 });

@@ -18,7 +18,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -42,7 +43,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -66,7 +68,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -105,7 +108,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.1+commit.df193b15\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_driverFlatFee\",\"type\":\"uint256\"}],\"name\":\"calcDriverFlatFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_networkServiceFee\",\"type\":\"uint256\"}],\"name\":\"calcServiceFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"oneStar\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"twoStar\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"threeStar\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"fourStar\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"fiveStar\",\"type\":\"uint256\"}],\"name\":\"calcWeightedAvg\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_i\",\"type\":\"uint256\"}],\"name\":\"uint2str\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"_uintAsString\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/dinesh/Blockchain-Projects/EthereumSolidityProject/contracts/helpers.sol\":\"FoodiezHelpers\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/dinesh/Blockchain-Projects/EthereumSolidityProject/contracts/helpers.sol\":{\"keccak256\":\"0x742b7f6ad7f9337d6849e3f62794d0e57925ee15a7d3f32290293d4c9f8b22c8\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://aa2be6e22bfe516df7c8792000334cb2a58f9306c2e8303f193604d55899fd5d\",\"dweb:/ipfs/QmVEhm9NdRfLCrJocdStSUnLoSi18HNHK9vfbfbo6RYxwF\"]}},\"version\":1}",
@@ -8127,9 +8131,17 @@
     "name": "solc",
     "version": "0.8.1+commit.df193b15.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xb439cc93F1f212721101d698dc2eFBea71F1c61A",
+      "transactionHash": "0xb405a2c911853a2ed715f60a96a48d89c4864b497277a25754404127d0b105b5"
+    }
+  },
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-03-26T00:48:46.893Z",
+  "updatedAt": "2021-03-26T06:44:33.356Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},
