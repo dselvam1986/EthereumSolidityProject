@@ -1,24 +1,25 @@
-pragma solidity 0.7.6;
+pragma solidity 0.8.1;
+// pragma solidity 0.7.6;
 // "SPDX-License-Identifier: UNLICENSED"
 
 contract FoodiezHelpers{
     
-    function uint2str(uint _i) public pure returns (string memory _uintAsString) {
+    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
         if (_i == 0) {
         return "0";
         }
         
-        uint j = _i;
-        uint len;
+        uint256 j = _i;
+        uint256 len;
         
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len - 1;
+        uint256 k = len - 1;
         while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
+            bstr[k--] = bytes1(uint8(48 + _i % 10));
             _i /= 10;
         }
         return string(bstr);

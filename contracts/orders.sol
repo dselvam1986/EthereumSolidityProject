@@ -1,4 +1,5 @@
-pragma solidity 0.7.6;
+pragma solidity 0.8.1;
+// pragma solidity 0.7.6;
 // "SPDX-License-Identifier: UNLICENSED"
 
 contract FoodiezOrders {
@@ -118,7 +119,7 @@ contract FoodiezOrders {
     }
      
     /*************************************Order Helpers ************************************************************************/
-    function getOrderStatusFriendly(uint8 _orderStatus) internal pure returns (string memory) {
+    function getOrderStatusFriendly(uint8 _orderStatus) internal pure returns (string memory status) {
         
         if(OrderStatus.Ordered == OrderStatus(_orderStatus) ) return "Ordered";
         if(OrderStatus.InTransit == OrderStatus(_orderStatus) ) return "InTransit";

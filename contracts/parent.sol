@@ -1,4 +1,5 @@
-pragma solidity 0.7.6;
+pragma solidity 0.8.1;
+// pragma solidity 0.7.6;
 // "SPDX-License-Identifier: UNLICENSED"
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -57,7 +58,7 @@ contract Foodiez {
         _foodiezRegistration.setParentContract(address(this));
         _foodiezOrders.setParentContract(address(this));
         
-        owner = msg.sender; // Token deploy address;
+        owner = payable(msg.sender); // Token deploy address;
         token = IERC20(_token);
     }
 
