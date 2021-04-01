@@ -10,7 +10,7 @@ const FoodiezToken = artifacts.require("FoodiezToken");
 module.exports = async function (deployer) {
 
     let FToken;
-    await deployer.deploy(FoodiezToken, "Foodiez", "FDZ", 10).then(function (instance) {
+    await deployer.deploy(FoodiezToken, "Foodiez", "FDZ", 100).then(function (instance) {
         FToken = instance;
     });
     // console.log("Deployed Token", FToken.address);
@@ -21,4 +21,6 @@ module.exports = async function (deployer) {
     const FRegister = await deployer.deploy(FoodiezRegistration, FHelper.address, FOrder.address);
 
     const FParent = await deployer.deploy(FoodiezParent, FRegister.address, FHelper.address, FOrder.address, FToken.address);
+
+    const approve = await FToken.approve(FParent.address, 1000);
 }

@@ -1,0 +1,227 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Storage Dapp</title>
+  <!-- <link rel="icon" type="image/png" href="./images/name.svg"> -->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <main class="container-fluid">
+    <header>
+      <h1 class="text-center">Foodiez</h1>
+    </header>
+
+    <!-- Part 1 Setting up Basic Actions and Status-->
+    <section [hidden]="! ethService.ethereumConnected">
+      <div class="row justify-content-md-center">
+        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+          <p class="info-text alert alert-primary">Network Id: <span>{{ethService.networkId}}</span></p>
+        </div>
+        <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+          <p class="info-text alert alert-primary">Chain Id: <span>{{ethService.chainId}}</span></p>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+          <p class="info-text alert alert-primary">Account Address: <span>{{ethService.activeAccount}}</span></p>
+        </div>
+      </div>
+      <ng-container *ngIf="userViewOn ">
+        <div class="row justify-content-md-center">
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">User Name: <span> {{userViewObj.name}}</span></p>
+          </div>
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">User Type:<span> {{userViewObj.type}}</span></p>
+          </div>
+          <ng-container *ngIf="userTypeCustomer">
+            <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+              <p class="info-text alert alert-primary">User Token:<span> {{userViewObj.token}}</span></p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!userTypeCustomer">
+            <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+              <p class="info-text alert alert-primary">Rating:<span> {{userViewObj.rating}}</span></p>
+            </div>
+            <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+              <p class="info-text alert alert-primary">Token:<span> {{userViewObj.token}}</span></p>
+            </div>
+          </ng-container>
+          
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="restViewOn ">
+        <div class="row justify-content-md-center">
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">Restaurant Id: <span> {{restViewObj.id}}</span></p>
+          </div>
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">Items:<span> {{restViewObj.items}}</span></p>
+          </div>
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">Rating:<span> {{restViewObj.rating}}</span></p>
+          </div>
+          <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
+            <p class="info-text alert alert-primary">Token:<span> {{restViewObj.token}}</span></p>
+          </div>
+      
+        </div>
+      </ng-container>
+
+    </section>
+
+    <section>
+      <div class="row justify-content-md-center d-flex">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title" *ngIf="!ethService.ethereumConnected" >Connect to Network</h4>
+              <button class="btn btn-primary btn-lg btn-block mb-3" [hidden]="ethService.ethereumConnected" (click)="connectToMetaMask()">Connect </button>
+
+              <ng-container *ngIf="ethService.ethereumConnected && !userViewOn && !restViewOn">
+                <h2 class="text-center">Join Foodiez</h2>
+                <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('user')">Register as User </button>
+                <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('restaurant')">Register as Restaurant </button>
+              </ng-container>
+
+              <ng-container *ngIf="registerAsUser && !userViewOn && !restViewOn">
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label class="small center-block text-center">First Name</label>
+                  <input style="text-transform: capitalize;" type="text" name="firstName" [(ngModel)]="userRegisterObj.fname" />
+                  <!-- <div *ngIf="f.submitted && !firstName.valid" class="help-block text-center">First Name is required</div> -->
+                </div>
+                
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label for="lastName" class="small center-block text-center">Last Name</label>
+                  <input style="text-transform: capitalize;" type="text" name="lastName" [(ngModel)]="userRegisterObj.lname" />
+                  <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
+                                                                 [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                </div>
+                
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label for="lastName" class="small center-block text-center">User Type</label>
+                  <select name="userTypeSelect" [(ngModel)]="userRegisterObj.type">
+                    <option disabled>Select User Type</option>
+                    <option *ngFor="let userType of userTypeOption" [value]="userType.id">{{userType.name}}</option>
+                  </select>
+                </div>
+                
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
+                  <input style="text-transform: capitalize;" type="text" name="token" [(ngModel)]="userRegisterObj.token" />
+                  <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div> [ngValue]="userType.id" -->
+                </div>
+                
+                
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <button type="submit" [disabled]="loading" (click)="registerUser()"
+                    class="btn btn-primary next-button row justify-content-md-center d-flex">Register
+                    <img *ngIf="loading"
+                      src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                  </button>
+                </div>
+              </ng-container>
+              
+              <ng-container *ngIf="registerAsRestaurant && !userViewOn && !restViewOn">
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label class="small center-block text-center">Restaurant Name</label>
+                  <input style="text-transform: capitalize;" type="text" name="firstName" [(ngModel)]="restaurantRegisterObj.name" />
+                  <!-- <div *ngIf="f.submitted && !firstName.valid" class="help-block text-center">First Name is required</div> -->
+                </div>
+              
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label for="lastName" class="small center-block text-center">Restaurant Id</label>
+                  <input type="text" name="lastName" [(ngModel)]="restaurantRegisterObj.id" />
+                  <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
+                                                                               [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                </div>
+              
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
+                  <input type="text" name="token" [(ngModel)]="restaurantRegisterObj.token" />
+                  <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div> [ngValue]="userType.id" -->
+                </div>
+              
+              
+                <div class="input-wrap row justify-content-md-center d-flex">
+                  <button type="submit" [disabled]="loading" (click)="registerRestaurant()"
+                    class="btn btn-primary next-button row justify-content-md-center d-flex">Register
+                    <img *ngIf="loading"
+                      src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                  </button>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12 ">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title">Simple Storage Contract </h4>
+              <div class="mb-3">
+                <button class="btn btn-primary btn-lg" id="storeButton">Store</button>
+                <input class="info-text" type="number" placeholder="Value to Store" id="storageValue" />
+              </div>
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="incrementButton">Increment</button>
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="queryButton">Query</button>
+              <p class="info-text alert alert-secondary">Contract Status: <span id="contractStatus">Not clicked</span>
+              </p>
+              <p class="info-text alert alert-secondary">Event Status: <span id="eventStatus">No Event Data</span></p>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </section>
+
+    <!-- <section>
+      <div class="row justify-content-md-center d-flex">
+        <div class="card col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+          <div class="card-body">
+            <h2 class="text-center">Join Foodiez</h2>
+            <div class="input-wrap row justify-content-md-center d-flex">
+              <label class="small center-block text-center">First Name</label>
+              <input style="text-transform: capitalize;" type="text" name="firstName" [(ngModel)]="userRegisterObj.fname" />
+              
+            </div>
+        
+            <div class="input-wrap row justify-content-md-center d-flex">
+              <label for="lastName" class="small center-block text-center">Last Name</label>
+              <input style="text-transform: capitalize;" type="text" name="lastName" [(ngModel)]="userRegisterObj.lname" />
+            </div>
+        
+            <div class="input-wrap row justify-content-md-center d-flex">
+              <label for="lastName" class="small center-block text-center">User Type</label>
+              <select name="userTypeSelect">
+                <option disabled>Select User Type</option>
+                <option *ngFor="let userType of userTypeOption" (click)="console.log(userType.id)">{{userType.name}}</option>
+              </select>
+            </div>
+        
+            <div class="input-wrap row justify-content-md-center d-flex">
+              <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
+              <input style="text-transform: capitalize;" type="text" name="token" [(ngModel)]="userRegisterObj.token" />
+            </div>
+        
+        
+            <div class="input-wrap row justify-content-md-center d-flex">
+              <button type="submit" [disabled]="loading" class="btn btn-primary next-button row justify-content-md-center d-flex">Register
+                <img *ngIf="loading"
+                  src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+              </button>
+            </div>
+        
+          </div>
+        </div>
+      </div>
+    </section> -->
+  </main>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
+</body>
+
+</html>

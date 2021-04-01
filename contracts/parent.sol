@@ -1,4 +1,4 @@
-pragma solidity 0.8.1;
+pragma solidity ^0.8.1;
 // pragma solidity 0.7.6;
 // "SPDX-License-Identifier: UNLICENSED"
 
@@ -170,7 +170,7 @@ contract Foodiez {
             _foodiezOrders.setTokenPayOrder(uniqueId, tokenPay);
             // transfer(address(this), tokenPay);
         }
-        
+
         emit OrderPlaced(uniqueId, total, status);
         return (uniqueId, oItemName, total, status);
     }

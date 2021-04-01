@@ -1,29 +1,46 @@
-pragma solidity 0.8.1;
+pragma solidity ^0.8.1;
 // pragma solidity 0.7.6;
 // "SPDX-License-Identifier: UNLICENSED"
 
 contract FoodiezHelpers{
-    
-    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-        return "0";
+    function uint2str(uint v) public pure returns (string memory) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = bytes1(uint8(48 + remainder));
         }
-        
-        uint256 j = _i;
-        uint256 len;
-        
-        while (j != 0) {
-            len++;
-            j /= 10;
+        bytes memory s = new bytes(i); // i + 1 is inefficient
+        for (uint j = 0; j < i; j++) {
+            s[j] = reversed[i - j - 1]; // to avoid the off-by-one error
         }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = bytes1(uint8(48 + _i % 10));
-            _i /= 10;
-        }
-        return string(bstr);
+        string memory str = string(s);  // memory isn't implicitly convertible to storage
+        return str;
     }
+
+        
+    // function uint2str(uint _i) public pure returns (string memory _uintAsString) {
+    //     if (_i == 0) {
+    //     return "0";
+    //     }
+        
+    //     uint j = _i;
+    //     uint len;
+        
+    //     while (j != 0) {
+    //         len++;
+    //         j /= 10;
+    //     }
+    //     bytes memory bstr = new bytes(len);
+    //     uint k = len - 1;
+    //     while (_i != 0) {
+    //         bstr[k--] = bytes1(uint8(48 + _i % 10));
+    //         _i /= 10;
+    //     }
+    //     return string(bstr);
+    // }
     
     // functions to calculate service fee and driver fee
     function calcServiceFee(uint _amount, uint _networkServiceFee) public pure returns(uint){
@@ -49,5 +66,15 @@ contract FoodiezHelpers{
         
         return averageRating;
         
+    }
+
+    function weiToEther(uint inWei) public pure returns (uint){
+        uint oneEth = 1000000000000000000; //inWei
+        return (inWei / oneEth);
+    }
+
+    function etherToWei(uint inEth) public pure returns (uint){
+        uint oneEth = 1000000000000000000;
+        return (inEth * oneEth);
     }
 }
