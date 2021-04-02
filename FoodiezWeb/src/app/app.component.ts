@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { VirtualTimeScheduler } from 'rxjs';
 import { EthcontractService } from './ethContract.service';
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -17,6 +18,9 @@ export class AppComponent {
   public userViewOn = false;
   public userTypeCustomer = true;
   public restViewOn = false;
+  public addingMenuItem = false;
+  public showingMenu = false;
+
 
   userRegisterObj = {
     fname: '',
@@ -55,8 +59,11 @@ export class AppComponent {
 
   menuItemRegisterObj = {
     name: "",
-    type: "",
-    price: ""
+    type: null,
+    price: "",
+    nameError: false,
+    typeError: false,
+    priceError: false,
   }
 
   userTypeOption = [
@@ -113,6 +120,7 @@ export class AppComponent {
   }
 
   public async checkAddressRegistration(address){
+    this.resetRegisterObj(3);
     if (address != '' && address != undefined){
       await this.ethService.checkAddressRegistration(address, true).then(async (data)=>{
         if (data.usrName !=undefined){
@@ -194,6 +202,7 @@ export class AppComponent {
     if (this.userRegisterObj.type == 1){
       await this.ethService.registerDriver(fullName, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
         if(result.status != undefined){
+          this.resetRegisterObj(1);
           this.checkAddressRegistration(result.from);
         }
         console.log("Driver Registey", result);
@@ -227,6 +236,7 @@ export class AppComponent {
     await this.ethService.registerRestaurant(this.restaurantRegisterObj.name, this.restaurantRegisterObj.id, this.restaurantRegisterObj.token).then( async (result)=>{
       if (result.status != undefined){
         console.log(result);
+        this.resetRegisterObj(2);
         this.checkAddressRegistration(result.from);
       }else{
         // error
@@ -235,16 +245,97 @@ export class AppComponent {
     })
   }
 
-  // public async createMenuItemRestaurant() {
-  //   await this.ethService.registerRestaurant("Shakti Restaurant", "shakti", 10).then((result) => {
-  //     console.log(result);
-  //   })
-  // }
+  public addMenuItemsView(){
+    this.addingMenuItem = true;
+    this.showingMenu = false;
+    this.menuItemArray = [];
+  }
+
+  public async getRestaurantMenuView(){
+    const self: this = this;
+    let numOfItem = Number(this.restViewObj.items);
+
+    for (var i = 0; i < numOfItem; i++) {
+      self.ethService.getMenuItem(this.currentAccount, i).then(async (result) => {
+        this.menuItemArray.push(result);
+      });
+    }
+
+    this.addingMenuItem = false;
+    this.showingMenu = true;
+  }
+
+  public async createRestaurantMenuItem() {
+
+    if(this.menuItemRegisterObj.name.trim() == "" ){
+      this.menuItemRegisterObj.nameError = true;
+      return;
+    }
+    if (this.menuItemRegisterObj.price.trim() == ""){
+      this.menuItemRegisterObj.priceError = true;
+      return;
+    }
+
+    if (this.menuItemRegisterObj.type == null){
+      this.menuItemRegisterObj.typeError = true;
+      return;
+    }
+
+    await this.ethService.addMenuItem(this.menuItemRegisterObj.name, this.menuItemRegisterObj.type, this.menuItemRegisterObj.price).then( async (result) => {
+      if (result.status != undefined) {
+        console.log(result);
+        // reset obj
+        this.resetRegisterObj(3);
+        this.checkAddressRegistration(result.from);
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
 
   public errorHandler(errorMessage) {
     let string = errorMessage.toString();
     let objIndex = string.indexOf('{');
     let objStr = string.substring(objIndex).trim()
     return JSON.parse(objStr);
+  }
+
+  public resetRegisterObj(num){
+    if(num == 1){
+      // user obj
+      this.userRegisterObj = {
+        fname: '',
+        lname: '',
+        type: null,
+        token: 0,
+        nameError: false,
+        typeError: false,
+        tokenError: false
+      }
+    }else if(num == 2){
+      // rest obj
+      this.restaurantRegisterObj = {
+        name: "",
+        id: "",
+        token: 0,
+        nameError: false,
+        idError: false,
+        tokenError: false
+      }
+    }else{
+      // menu obj
+      this.menuItemRegisterObj = {
+        name: "",
+        type: null,
+        price: "",
+        nameError: false,
+        typeError: false,
+        priceError: false,
+      }
+
+      this.menuItemArray = [];
+    }
+
   }
 }

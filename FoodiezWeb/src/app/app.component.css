@@ -1,0 +1,24 @@
+
+.restaurantMenuBtn {
+    width: 167px
+}
+
+.flexContain{
+    display: flex;
+}
+.leftDiv{
+    width: 50%;     
+}
+.rightDiv{
+    flex-grow: 1; 
+}
+.addMenuTitle{
+    text-align: center;
+}
+.addMenuInput{
+    width: 100%;
+    height: 98%;
+}
+.showMenuTitle{
+    font-weight: bolder;
+}

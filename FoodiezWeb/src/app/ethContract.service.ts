@@ -67,7 +67,7 @@ export class EthcontractService {
             
             setTimeout(function(){
                 self.accountChangeSubject.next(window.web3.currentProvider.selectedAddress);
-            }, 1000)
+            }, 500)
             
 
             let accountCheckInterval = setInterval(function () {
@@ -235,19 +235,65 @@ export class EthcontractService {
             });
     }
 
-    public async addMenuItem(name, type, price): Promise<any>{
-        new Promise((reject, resolve) => {
-            return this.foodiezInstance.methods.addMenuItems(name, type, price).send({ from: this.activeAccount }, function (error, result) {
-                if (error) {
-                    reject(error);
-                    console.log(error);
-                } else {
-                    console.log(result)
-                    return result;
-                }
-            })
-        })
+    public addMenuItem(name, type, price): any{
+        return this.foodiezInstance.methods.addMenuItems(name, type, price).send({ from: this.activeAccount }).then( function(result){
+            return result;
+        }).catch((error)=>{
+            return error;
+        });
     }
+
+    public getMenuItem(address, itemNum): any {
+        return this.foodiezInstance.methods.getRestaurantMenu(address, itemNum).call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+
+    /*************Order methods**************************************************************************** */
+
+    public placeOrder(address, itemNum, tokenPay): any {
+        return this.foodiezInstance.methods.placeOrder(address, itemNum, tokenPay).call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+
+    public orderStatus(userOrderId): any {
+        return this.foodiezInstance.methods.getOrderStatus(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+    //assignToDriver
+    public driverAssign(userOrderId): any {
+        return this.foodiezInstance.methods.assignToDriver(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+    //driverDelieveredOrder
+    public driverDeliveredOrder(userOrderId): any {
+        return this.foodiezInstance.methods.driverDelieveredOrder(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+    
+    //orderDeliveryConfirmed
+    public orderDelievered(userOrderId, restRating, userRating, tip, tokenTip): any {
+        return this.foodiezInstance.methods.orderDeliveryConfirmed(userOrderId, restRating, userRating, tokenTip).send({ from: this.activeAccount, value: window.web3.utils.toWei(tip, 'ether')}).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+
 
     // public async registerDriver(name, type, tokenAmt): Promise<any> {
     //     new Promise((reject, resolve) => {

@@ -358,3 +358,27 @@ node_modules/\@openzeppelin/contracts/utils/SafeCast.sol
 node_modules/\@openzeppelin/contracts/utils/Strings.sol
 
 node_modules/
+
+build/contracts/Context.json
+
+build/contracts/ERC20.json
+
+build/contracts/Foodiez.json
+
+build/contracts/FoodiezHelpers.json
+
+build/contracts/FoodiezHelpersInterface.json
+
+build/contracts/FoodiezOrders.json
+
+build/contracts/FoodiezOrdersInterface.json
+
+build/contracts/FoodiezRegistration.json
+
+build/contracts/FoodiezRegistrationInterface.json
+
+build/contracts/FoodiezToken.json
+
+build/contracts/IERC20.json
+
+build/contracts/Migrations.json
