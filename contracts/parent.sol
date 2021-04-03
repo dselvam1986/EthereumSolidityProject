@@ -155,6 +155,10 @@ contract Foodiez {
     function getrestaurantInfo(address _restaurantAddress) public view returns(string memory rId, address rAddress, uint256 rItems, uint256 rating){
         return _foodiezRegistration.getrestaurantInfo(_restaurantAddress);
     }
+
+    function getAllRestaurants() public view returns(uint256 count, address[] memory restAddresses){
+        return _foodiezRegistration.getTotalRestaurants();
+    }
     
     /************Foodiez Orders Vars and Functions**********************/
     function placeOrder(address _restaurantAddress, uint _itemNum, uint tokenPay) public payable returns (string memory uOrderId, string memory orderItemName, uint256 orderTotal, string memory orderStatus){
@@ -174,6 +178,12 @@ contract Foodiez {
         emit OrderPlaced(uniqueId, total, status);
         return (uniqueId, oItemName, total, status);
     }
+
+    function getAllUserOrders(address _userAddress) public view returns (uint256 total){
+        return _foodiezOrders.getAllUserOrders(_userAddress);
+    }
+
+    
     
     function getOrderStatus(string memory userOrderId) public view returns (string memory orderId, address userAddress, address driverAddress, string memory items, uint256 total, string memory status){
         return _foodiezOrders.getUserOrderStatus(userOrderId);

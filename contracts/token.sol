@@ -10,7 +10,7 @@ contract FoodiezToken is ERC20{
     
     uint256 totalSupply_;
     
-    constructor(string memory name, string memory symbol, uint256 count) ERC20(name, symbol) public {
+    constructor(string memory name, string memory symbol, uint256 count) ERC20(name, symbol) {
         
         owner = msg.sender;
         

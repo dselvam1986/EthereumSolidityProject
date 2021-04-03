@@ -18,6 +18,8 @@ interface FoodiezRegistrationInterface {
     function getRestaurantMenu(address _restaurantAddress, uint _itemNumber) external view returns(string memory, string memory, uint);
     
     function getrestaurantInfo(address _restaurantAddress) external view returns(string memory, address, uint, uint);
+
+    function getTotalRestaurants() external view returns (uint256, address[] memory restAddresses);
     
     /*************Orders Functions********************************************************************/
     function getOrderTotal(address _userAddress, address _address, uint _itemNum) external view  returns(string memory, address, string memory, uint);

@@ -54,7 +54,8 @@ export class AppComponent {
     items: 0,
     token: 0,
     amount: 0,
-    rating: 0
+    rating: 0,
+    address: ''
   }
 
   menuItemRegisterObj = {
@@ -78,6 +79,7 @@ export class AppComponent {
   ];
 
   menuItemArray = [];
+  restaurantArray =[];
 
   constructor(private ethService: EthcontractService){}
 
@@ -133,6 +135,7 @@ export class AppComponent {
           
           if(data.usrType == 'Customer'){
             this.userTypeCustomer = true;
+            this.getAllRestaurant();
           }else{
             this.userTypeCustomer = false;
           }
@@ -253,16 +256,32 @@ export class AppComponent {
 
   public async getRestaurantMenuView(){
     const self: this = this;
-    let numOfItem = Number(this.restViewObj.items);
 
-    for (var i = 0; i < numOfItem; i++) {
-      self.ethService.getMenuItem(this.currentAccount, i).then(async (result) => {
-        this.menuItemArray.push(result);
-      });
-    }
+      let numOfItem = Number(this.restViewObj.items);
+
+      for (var i = 0; i < numOfItem; i++) {
+        self.ethService.getMenuItem(this.currentAccount, i).then(async (result) => {
+          this.menuItemArray.push(result);
+        });
+      }
 
     this.addingMenuItem = false;
     this.showingMenu = true;
+  }
+
+  public async getRestaurantMenu(address, numItems) {
+    this.menuItemArray = [];
+
+    if (address != null || address != '') {
+
+      for (var i = 0; i < numItems; i++) {
+        this.ethService.getMenuItem(address, i).then(async (result) => {
+          result['restAddress'] = address;
+          this.menuItemArray.push(result);
+        });
+      }
+    }
+
   }
 
   public async createRestaurantMenuItem() {
@@ -294,6 +313,50 @@ export class AppComponent {
     })
   }
 
+  public getAllRestaurant(){
+    const self: this = this;
+    this.ethService.getAllRestaurants().then(async (result) => {
+      if (result.count != undefined) {
+        let num = result.restAddresses.length;
+        let restAddress = result.restAddresses;
+        for (var i = 0; i < num; i++){
+          await this.ethService.checkAddressRegistration(restAddress[i], false).then( (data) => {
+
+            // let res = this.errorHandler(data);
+            if (data.rId != undefined) {
+              // console.log(data);
+              self.restViewObj.id = data.rId;
+              self.restViewObj.items = data.rItems;
+              self.restViewObj.rating = data.rating;
+              self.restViewObj.address = restAddress[i];
+
+              self.restaurantArray.push(self.restViewObj);
+              self.resetRegisterObj(2);
+            } 
+          });
+        }
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public async placeOrder(itemNum, price, address){
+    console.log(itemNum);
+    console.log(address);
+    await this.ethService.placeOrder(address, itemNum, 0, price).then(async (result) => {
+      if (result.status != undefined) {
+        console.log(result);
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+
   public errorHandler(errorMessage) {
     let string = errorMessage.toString();
     let objIndex = string.indexOf('{');
@@ -322,7 +385,17 @@ export class AppComponent {
         nameError: false,
         idError: false,
         tokenError: false
-      }
+      };
+
+      this.restViewObj = {
+        id: '',
+        items: 0,
+        token: 0,
+        amount: 0,
+        rating: 0,
+        address: ''
+      };
+
     }else{
       // menu obj
       this.menuItemRegisterObj = {
@@ -334,6 +407,7 @@ export class AppComponent {
         priceError: false,
       }
 
+      this.restaurantArray = [];
       this.menuItemArray = [];
     }
 

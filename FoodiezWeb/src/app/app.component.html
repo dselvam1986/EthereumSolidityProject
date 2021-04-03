@@ -164,84 +164,47 @@
               </ng-container>
 
               <ng-container *ngIf="userViewOn">
+                <h2 class="text-center">Available Restaurant</h2>
                 <div class="container flexContain">
-              
-                  <div class="leftDiv col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
-                    <button type="submit" [disabled]="loading" (click)="addMenuItemsView()"
-                      class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Start Order
-                      <img *ngIf="loading"
-                        src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                    </button>
-                  </div>
-              
-                  <div class=" rightDiv col-xl-9 col-lg-3 col-md-12 col-sm-12 col-12">
-                    <ng-container *ngIf="addingMenuItem">
-              
-                      <div class="addMenuTitle">
-                        <h4 class="card-title">Add Menu Item</h4>
-                      </div>
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Name: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
-                            [(ngModel)]="menuItemRegisterObj.name" />
-                        </div>
-                      </div>
-              
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Type: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <select class="addMenuInput" name="itemTypeSelect" [(ngModel)]="menuItemRegisterObj.type">
-                            <option selected disabled>Select Item Type</option>
-                            <option *ngFor="let itemType of menuItemType" [value]="itemType.id">{{itemType.name}}</option>
-                          </select>
-                        </div>
-                      </div>
-              
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Price: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
-                            [(ngModel)]="menuItemRegisterObj.price" />
-                        </div>
-                      </div>
-              
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <button type="submit" [disabled]="loading" (click)="createRestaurantMenuItem()"
-                          class="btn btn-primary next-button row justify-content-md-center d-flex">Register
-                          <img *ngIf="loading"
-                            src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                        </button>
-                      </div>
-              
-                    </ng-container>
-              
-                    <ng-container *ngIf="showingMenu">
-              
-                      <div class="addMenuTitle">
-                        <h4 class="card-title">Menu Item</h4>
-                      </div>
-                      <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
-                        <div class="col-xl-4 showMenuTitle">Name</div>
-                        <div class="col-xl-4 showMenuTitle">Type</div>
-                        <div class="col-xl-4 showMenuTitle">Price</div>
-                      </div>
-                      <ng-container *ngFor="let item of menuItemArray">
-                        <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
-                          <div class="col-xl-4">{{item.itemName}}</div>
-                          <div class="col-xl-4">{{item.itemType}}</div>
-                          <div class="col-xl-4">{{item.itemPrice}}</div>
-                        </div>
-                      </ng-container>
-                    </ng-container>
-                  </div>
+
+                  <ng-container *ngFor="let rest of restaurantArray">
+                    <div class="leftDiv col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+                      <button type="submit" [disabled]="loading" (click)="getRestaurantMenu(rest.address, rest.items)"
+                      class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">{{rest.id}}
+                      </button>
+                    </div>
+                  </ng-container>
                 </div>
+
+                <ng-container *ngIf="menuItemArray.length > 0">
+                  <div class="container flexContain">
+                    <div class="leftDiv col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 flexContain">
+                      <div class="col-xl-4 showMenuTitle">Name</div>
+                      <div class="col-xl-4 showMenuTitle">Type</div>
+                      <div class="col-xl-4 showMenuTitle">Price</div>
+                    </div>
+                  </div>
+
+                  <ng-container *ngFor="let item of menuItemArray; let i = index">
+                    <div class="container flexContain">
+                      <button class="flexContain restaurantMenuUserViewBtn btn btn-primary next-button row" 
+                        (click)="placeOrder(i, item.itemPrice, item.restAddress)">
+                        <div class="col-xl-2">{{item.itemName}}</div>
+                        <div class="col-xl-2"></div>
+                        <div class="col-xl-2">{{item.itemType}}</div>
+                        <div class="col-xl-2"></div>
+                        <div class="col-xl-2">{{item.itemPrice}}</div>
+                      </button>
+                      <!-- <div class="leftDiv col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 flexContain">
+                        <div class="col-xl-4">{{item.itemName}}</div>
+                        <div class="col-xl-4">{{item.itemType}}</div>
+                        <div class="col-xl-4">{{item.itemPrice}}</div>
+                      </div> -->
+                    </div>
+                  </ng-container>
+                  
+                </ng-container>
+                
               </ng-container>
 
               <ng-container *ngIf="restViewOn">

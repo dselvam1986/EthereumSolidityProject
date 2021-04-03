@@ -235,6 +235,15 @@ export class EthcontractService {
             });
     }
 
+    public getAllRestaurants(): any{
+
+        return this.foodiezInstance.methods.getAllRestaurants().call().then(function (result) {
+            return result;
+            }).catch((error) => {
+                return error;
+            });
+    }
+
     public addMenuItem(name, type, price): any{
         return this.foodiezInstance.methods.addMenuItems(name, type, price).send({ from: this.activeAccount }).then( function(result){
             return result;
@@ -253,8 +262,8 @@ export class EthcontractService {
 
     /*************Order methods**************************************************************************** */
 
-    public placeOrder(address, itemNum, tokenPay): any {
-        return this.foodiezInstance.methods.placeOrder(address, itemNum, tokenPay).call({ from: this.activeAccount }).then(function (result) {
+    public placeOrder(address, itemNum, tokenPay, price): any {
+        return this.foodiezInstance.methods.placeOrder(address, itemNum, tokenPay).send({ from: this.activeAccount, value: window.web3.utils.toWei(price, 'ether') }).then(function (result) {
             return result;
         }).catch((error) => {
             return error;
@@ -293,35 +302,6 @@ export class EthcontractService {
             return error;
         });
     }
-
-
-    // public async registerDriver(name, type, tokenAmt): Promise<any> {
-    //     new Promise((reject, resolve) => {
-    //         return this.foodiezInstance.methods.userRegister(name, type, tokenAmt).send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') }, function (error, result) {
-    //             if (error) {
-    //                 reject(error);
-    //                 console.log(error);
-    //             } else {
-    //                 console.log(result)
-    //                 return result;
-    //             }
-    //         })
-    //     })
-    // }
-
-    // public async registerRestaurant(name, id, tokenAmt): Promise<any> {
-    //     new Promise((reject, resolve) => {
-    //         return this.foodiezInstance.methods.registerRestaurant(name, id, tokenAmt).send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') }, function (error, result) {
-    //             if (error) {
-    //                 reject(error);
-    //                 console.log(error);
-    //             } else {
-    //                 console.log(result)
-    //                 return result;
-    //             }
-    //         })
-    //     })
-    // }
 
     public errorHandler(errorMessage){
         let string = errorMessage.toString();

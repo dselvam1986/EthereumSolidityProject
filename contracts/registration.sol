@@ -194,6 +194,10 @@ contract FoodiezRegistration {
         Restaurant memory rest = RestaurantMapping[_restaurantAddress];
         return(rest.rId, rest.restaurantAddress, rest.noOfItems, rest.rating);
     }
+
+    function getTotalRestaurants() public OnlyParent view returns (uint256, address[] memory restAddresses){
+        return (RestaurantCount.length, RestaurantCount);
+    }
     
     /*************Orders Functions********************************************************************/
     function getOrderTotal(address _userAddress, address _address, uint _itemNum) public view OnlyParent returns(string memory, address, string memory, uint){

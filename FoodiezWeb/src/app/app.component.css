@@ -2,9 +2,13 @@
 .restaurantMenuBtn {
     width: 167px
 }
+.restaurantMenuUserViewBtn{
+    width: 100%
+}
 
 .flexContain{
     display: flex;
+    overflow: auto;
 }
 .leftDiv{
     width: 50%;     
