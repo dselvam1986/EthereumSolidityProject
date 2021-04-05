@@ -9,4 +9,6 @@ interface FoodiezHelpersInterface {
     function calcWeightedAvg(uint oneStar, uint twoStar, uint threeStar, uint fourStar, uint fiveStar) external pure returns (uint);
     function weiToEther(uint inWei) external pure returns (uint);
     function etherToWei(uint inEth) external pure returns (uint);
+    function getUserTypeFriendly(uint8 _usrType) external pure returns (string memory userType);
+    function getMenuTypeFriendly(uint8 _menuType) external pure returns (string memory userType);
 }

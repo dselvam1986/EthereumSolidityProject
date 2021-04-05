@@ -20,11 +20,22 @@ export class AppComponent {
   public restViewOn = false;
   public addingMenuItem = false;
   public showingMenu = false;
+  public userRestsView = true;
+  public userOrdersView = false;
 
+  /********Order track var*************** */
+  public restaurantChoosen = "";
+  public orderConfirmationScreen = false;
+  public orderTotals = {
+    total: 0,
+    serviceFee: 0,
+    networkFee: 0,
+    final: 0
+  };
 
   userRegisterObj = {
-    fname: '',
-    lname: '',
+    fname: '', // full name
+    userId: '',
     type: null,
     token: 0,
     nameError: false,
@@ -34,10 +45,13 @@ export class AppComponent {
 
   userViewObj = {
     name: '',
+    userId:'',
     type: '',
     token: 0,
     amount: 0,
-    rating: 0
+    rating: 0,
+    activeOrders: 0,
+    naviRestaurant: true
   }
 
   restaurantRegisterObj = {
@@ -103,7 +117,8 @@ export class AppComponent {
     console.log(result);
   }
 
-  /********************************Registration methods******************************************************************************************** */
+  /********************************Registration info methods******************************************************************************************** */
+  
   public registerAddress(type){
     if(type == 'user'){
       this.registerAsUser = true;
@@ -115,6 +130,21 @@ export class AppComponent {
   }
   public setUserType(typeNum){
     this.userRegisterObj.type = typeNum;
+  }
+
+  public changeUserView(isRestView){
+    if (isRestView){
+      this.getAllRestaurant();
+      this.userViewObj.naviRestaurant = true;
+      this.userOrdersView = false;
+      this.userRestsView = true;
+    }else{
+      this.getAllUserOrders();
+      this.userViewObj.naviRestaurant = false;
+      this.userOrdersView = true;
+      this.userRestsView = false;
+    }
+
   }
 
   public setMenuType(typeNum) {
@@ -129,6 +159,7 @@ export class AppComponent {
           // user identified. update view to User view based on type
           // console.log(data);
           this.userViewObj.name = data.usrName;
+          this.userViewObj.userId = data.usrId;
           this.userViewObj.type = data.usrType;
           this.userViewObj.rating = data.rating;
           this.userViewObj.token = await this.ethService.getTokenBalance(address);
@@ -136,6 +167,7 @@ export class AppComponent {
           if(data.usrType == 'Customer'){
             this.userTypeCustomer = true;
             this.getAllRestaurant();
+            this.getUserOrder();
           }else{
             this.userTypeCustomer = false;
           }
@@ -185,7 +217,7 @@ export class AppComponent {
   public async registerUser() {
 
     // check to make sure all fields are valid
-    if (this.userRegisterObj.fname.trim() == '' || this.userRegisterObj.lname.trim() == ''){
+    if (this.userRegisterObj.fname.trim() == '' || this.userRegisterObj.userId.trim() == ''){
       this.userRegisterObj.nameError = true;
       return;
     }
@@ -200,10 +232,8 @@ export class AppComponent {
       return;
     }
 
-    let fullName = this.userRegisterObj.fname + this.userRegisterObj.lname;
-
     if (this.userRegisterObj.type == 1){
-      await this.ethService.registerDriver(fullName, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
+      await this.ethService.registerDriver(this.userRegisterObj.fname, this.userRegisterObj.userId, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
         if(result.status != undefined){
           this.resetRegisterObj(1);
           this.checkAddressRegistration(result.from);
@@ -211,7 +241,7 @@ export class AppComponent {
         console.log("Driver Registey", result);
       });
     }else{
-      await this.ethService.registerUser(fullName, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
+      await this.ethService.registerUser(this.userRegisterObj.fname, this.userRegisterObj.userId, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
         if (result.status != undefined) {
           this.checkAddressRegistration(result.from);
         }
@@ -277,9 +307,11 @@ export class AppComponent {
       for (var i = 0; i < numItems; i++) {
         this.ethService.getMenuItem(address, i).then(async (result) => {
           result['restAddress'] = address;
+          result['isSelected'] = false;
           this.menuItemArray.push(result);
         });
       }
+      this.restaurantChoosen = address;
     }
 
   }
@@ -313,8 +345,19 @@ export class AppComponent {
     })
   }
 
+  public async getUserOrderCount(){
+    await this.ethService.registerUser(this.userRegisterObj.fname, this.userRegisterObj.userId, this.userRegisterObj.type, this.userRegisterObj.token).then(async (result) => {
+      if (result.status != undefined) {
+        this.checkAddressRegistration(result.from);
+      }
+      console.log("User Registry: ", result);
+    });
+  }
+
+  /*************************Order Methods************************************************************************************** */
   public getAllRestaurant(){
     const self: this = this;
+    self.restaurantArray = [];
     this.ethService.getAllRestaurants().then(async (result) => {
       if (result.count != undefined) {
         let num = result.restAddresses.length;
@@ -342,11 +385,83 @@ export class AppComponent {
     })
   }
 
-  public async placeOrder(itemNum, price, address){
+  public async getAllUserOrders(){
+
+    for (var i = 0; i < this.userViewObj.activeOrders; i++){
+      let uniqueId = this.userViewObj.userId + i;
+
+      await this.ethService.getOrderStatus(uniqueId).then(async (result)=>{
+        console.log(result);
+      })
+      
+    }
+    
+  }
+
+  public addItemForOrder(index){
+    this.menuItemArray[index].isSelected = !this.menuItemArray[index].isSelected;
+
+    console.log(this.menuItemArray);
+  }
+
+  public async getOrderTotal(){
+
+    let itemNum = [];
+    let total = 0;
+
+    for(var i = 0; i< this.menuItemArray.length; i++){
+      if(this.menuItemArray[i].isSelected){
+        itemNum.push(i);
+        total += Number(this.menuItemArray[i].itemPrice);
+      }
+    }
     console.log(itemNum);
-    console.log(address);
-    await this.ethService.placeOrder(address, itemNum, 0, price).then(async (result) => {
+    await this.ethService.orderTotal(this.restaurantChoosen, itemNum).then(async (result) => {
+      if (result != undefined) {
+
+        this.orderTotals.serviceFee = (total * (2/100));
+        this.orderTotals.networkFee = (total * (2/100));
+        this.orderTotals.total = total;
+        this.orderTotals.final = result;
+        this.orderConfirmationScreen = true;
+        console.log(result);
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public navBackToMenuScreen(){
+    this.orderConfirmationScreen = false;
+  }
+
+  public async placeOrder() {
+
+    let itemNameArry = [];
+    for (var i = 0; i < this.menuItemArray.length; i++) {
+      if (this.menuItemArray[i].isSelected) {
+        itemNameArry.push(this.menuItemArray[i].itemName)
+      }
+    }
+
+    await this.ethService.placeOrder(this.restaurantChoosen, itemNameArry, this.orderTotals.final, 0).then(async (result) => {
       if (result.status != undefined) {
+        console.log(result);
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public async getUserOrder() {
+
+    await this.ethService.getUserOrders().then(async (result) => {
+      if (result != undefined) {
+        this.userViewObj.activeOrders = result;
         console.log(result);
         // reset obj
       } else {
@@ -369,7 +484,7 @@ export class AppComponent {
       // user obj
       this.userRegisterObj = {
         fname: '',
-        lname: '',
+        userId: '',
         type: null,
         token: 0,
         nameError: false,
@@ -395,6 +510,8 @@ export class AppComponent {
         rating: 0,
         address: ''
       };
+
+      this.restaurantChoosen = '';
 
     }else{
       // menu obj

@@ -43,12 +43,13 @@ contract FoodiezOrders {
          address restaurantAddress;
          address userAddress;
          address driverAddress;
-         string items;
+         string[] items;
          uint total;
          OrderStatus status;
      }
      
      mapping(string => Order) UserOrders; // unique user order id to order.
+     mapping(address => uint256) UserOrderCount;
      mapping(address => Order) DriverOrderAssignment; // order assigned to driver. 
      mapping(string => uint256) OrderIdTokenPay;
      
@@ -63,17 +64,18 @@ contract FoodiezOrders {
      event OrderDeliveredToCustomer(bytes data, address sender);
      
     /**************************User Food Orders***************************************************************************************************************************************/
-    function createFoodOrderEntry( string memory _uniqueOrderId, string memory _rId, address _restaurantAddress, address _userAddress, string memory _itemName, uint _total) 
-    public payable OnlyParent returns(string memory, string memory, uint256, string memory) {
-        
-        Order memory order = Order(_uniqueOrderId, _rId, _restaurantAddress, _userAddress,address(0x0), _itemName, _total, OrderStatus(0));
-        UserOrders[_uniqueOrderId] = order;
-        
-        return( _uniqueOrderId, _itemName, _total, getOrderStatusFriendly(uint8(order.status)) );
-        
+    function createFoodOrderEntry( string memory _uniqueUserOrderId, string memory _rId, address _restaurantAddress, address _userAddress, string[] memory _itemName, uint _total) 
+    public payable OnlyParent returns(string memory, string memory) {
+
+        require(checkIsStringEmpty(_uniqueUserOrderId) == false , "unique order id is not sent.");
+
+        Order memory order = Order(_uniqueUserOrderId, _rId, _restaurantAddress, _userAddress,address(0x0), _itemName, _total, OrderStatus(0));
+        UserOrders[_uniqueUserOrderId] = order;
+
+        return( order.orderId, getOrderStatusFriendly(uint8(order.status)) );
     }
     
-    function getUserOrderStatus(string memory userOrderId) public view OnlyParent returns(string memory, address, address, string memory, uint256, string memory){
+    function getUserOrderStatus(string memory userOrderId) public view OnlyParent returns(string memory, address, address, string[] memory, uint256, string memory){
         Order memory order = UserOrders[userOrderId];
         
         return (order.orderId, order.userAddress, order.driverAddress, order.items, order.total, getOrderStatusFriendly(uint8(order.status)));
@@ -136,4 +138,12 @@ contract FoodiezOrders {
         return tokenPay;
     }
     
+    function checkIsStringEmpty(string memory stringToTest) internal pure returns (bool){
+        bytes memory checkString = bytes(stringToTest);
+        if(checkString.length == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

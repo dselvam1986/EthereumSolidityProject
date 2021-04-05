@@ -1,11 +1,3 @@
-
-.restaurantMenuBtn {
-    width: 167px
-}
-.restaurantMenuUserViewBtn{
-    width: 100%
-}
-
 .flexContain{
     display: flex;
     overflow: auto;
@@ -16,6 +8,17 @@
 .rightDiv{
     flex-grow: 1; 
 }
+
+/*******user View and Restaurant************************/
+.restaurantMenuBtn {
+    width: 167px
+}
+.restaurantMenuUserViewBtn{
+    width: 100%;
+    border: 0px;
+    background: white;
+    padding: 0px;
+}
 .addMenuTitle{
     text-align: center;
 }
@@ -25,4 +28,45 @@
 }
 .showMenuTitle{
     font-weight: bolder;
+    text-align: center;
 }
+.userViewMenuItemsTextAlign{
+    text-align: -webkit-center;
+}
+.navDivAlign{
+    text-align: -webkit-center;
+}
+.navContain{
+    margin-left: auto;
+    margin-right: auto;
+}
+.navButtons{
+    display: inline-block;
+    width: 30%;
+}
+.navButtonBGColor{
+    border-color: #00695c;
+}
+.navButtonBGColorSelected{
+    background-color: #90caf9;
+    border: 2px solid;
+}
+
+.restNameBox, .menuItemBox{
+    border: 1px solid;
+    border-color: #f9eded;
+}
+
+.restarantOrderAlign, .orderConfirmationTitleAlign{
+    text-align: center;
+}
+
+.restarantOrderMenuTitle{
+    text-decoration: underline;
+}
+
+.restaurantOrderPrice{
+    text-align: right;
+}
+
+/****************Order View****************************************/

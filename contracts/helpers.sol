@@ -3,7 +3,14 @@ pragma solidity ^0.8.1;
 // "SPDX-License-Identifier: UNLICENSED"
 
 contract FoodiezHelpers{
+
+    enum UserType { Customer, Delivery } // 0 , 1
+    enum MenuType { Appetizer, Main, Desert }
+
     function uint2str(uint v) public pure returns (string memory) {
+        if(v == 0){
+            return '0';
+        }
         uint maxlength = 100;
         bytes memory reversed = new bytes(maxlength);
         uint i = 0;
@@ -76,5 +83,18 @@ contract FoodiezHelpers{
     function etherToWei(uint inEth) public pure returns (uint){
         uint oneEth = 1000000000000000000;
         return (inEth * oneEth);
+    }
+
+    function getUserTypeFriendly(uint8 _usrType) public pure returns (string memory userType) {
+        
+        if(UserType.Customer == UserType(_usrType) ) return "Customer";
+        if(UserType.Delivery == UserType(_usrType)) return "Delivery";
+    }
+    
+    function getMenuTypeFriendly(uint8 _menuType) public pure returns (string memory userType) {
+        
+        if(MenuType.Appetizer == MenuType(_menuType) ) return "Appetizer";
+        if(MenuType.Main == MenuType(_menuType) ) return "Main";
+        if(MenuType.Desert == MenuType(_menuType)) return "Desert";
     }
 }

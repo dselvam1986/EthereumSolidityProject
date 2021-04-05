@@ -31,15 +31,16 @@ contract FoodiezRegistration {
     enum UserType { Customer, Delivery } // 0 , 1
     struct User {
         string name;
-        address userID;
+        string userId;
+        address userAddress;
         UserType usrType;
         uint256 rating;
-        uint256 tokens;
         bool isRegistered;
     }
      
     // address to registered user mapping.
     mapping(address => User) registeredUserMapping;
+    mapping(address => uint256) userOrderCount;
     address[] RegisteredUserAddresses;
     
     /************Restaurant and mapping**********************/
@@ -111,13 +112,13 @@ contract FoodiezRegistration {
     /************User and Restaurant***********************************************/
     
     // User Registration
-    function userRegistration(address _address, string memory name, uint uType) public OnlyParent returns (bool) {
+    function userRegistration(address _address, string memory name, string memory userId, uint uType) public OnlyParent returns (bool) {
          require(isUserRegistered(_address) == false, "User Already registered");
         
         // task: check is user is already registered, is yes then return message already registered
-         
-        User memory u = User(name, _address, UserType(uType), 0, 0, true);
+        User memory u = User(name, userId, _address, UserType(uType), 0, true);
         registeredUserMapping[_address] = u;
+        userOrderCount[_address] = 0;
         RegisteredUserAddresses.push(_address);
         
         if(uType == 1){
@@ -125,20 +126,19 @@ contract FoodiezRegistration {
             Rating memory rating = Rating(0,0,0,0,0);
             DriverRating[_address] = rating;
         } 
-        
         return true;
      }
-     
-    function getUserInfo(address _address) public OnlyParent view returns(string memory, address, string memory, uint256 ){
+    function getUserInfo(address _address) public OnlyParent view returns(string memory, string memory, string memory, uint256 ){
         require(isUserRegistered(_address) == true, "User data not found! ");
         
         User memory usr = registeredUserMapping[_address];
          
-        return(usr.name, usr.userID, getUserTypeFriendly(uint8(usr.usrType)), usr.rating);
+        return(usr.name, usr.userId, _foodiezHelpers.getUserTypeFriendly(uint8(usr.usrType)), usr.rating);
          
      }
     
     // Restaurant and Items Registration 
+    
     function createRestaurant(address _address, string memory _name, string memory _rId) public OnlyParent returns(bool) {
         require(isRestaurantRegistered(_address) == false, "Restaurant is already registered.");
         
@@ -155,7 +155,7 @@ contract FoodiezRegistration {
         
         return true;
     }
-    
+
     function addMenuItems(address _address, string memory _itemName, uint _type, uint _price) public OnlyParent returns (string memory, string memory, string memory) {
         // only allowed by restaurants address that are already registered.
         require(isRestaurantRegistered(_address) == true, "Restaurant is not registered.");
@@ -184,7 +184,7 @@ contract FoodiezRegistration {
         string[] memory menuItems = rest.itemNames;
         
         MenuItem memory item = RestaurantMenuItems[menuItems[_itemNumber]];
-        return(item.name, getMenuTypeFriendly(uint8(item.itemType)) , item.price);
+        return(item.name,  _foodiezHelpers.getMenuTypeFriendly(uint8(item.itemType)) , item.price);
         
     }
     
@@ -200,36 +200,45 @@ contract FoodiezRegistration {
     }
     
     /*************Orders Functions********************************************************************/
-    function getOrderTotal(address _userAddress, address _address, uint _itemNum) public view OnlyParent returns(string memory, address, string memory, uint){
+    function getOrderTotal(address _userAddress, address _address, uint[] memory _itemNum) public view OnlyParent returns(uint){
         require(isUserRegistered(_userAddress) == true, "User must register before placing order");
         uint totalPrice = 0;
         // get restaurant
         Restaurant memory rest = RestaurantMapping[_address];
         
         string[] memory menuItems = rest.itemNames;
-        MenuItem memory m = RestaurantMenuItems[menuItems[_itemNum]];
+        for(uint i = 0;i < _itemNum.length; i++){
+            MenuItem memory m = RestaurantMenuItems[menuItems[_itemNum[i]]];
+            totalPrice += m.price;
+        }
         
-        totalPrice += m.price;
         // calculate total bill
         uint tempTotal = totalPrice;
         totalPrice += _foodiezHelpers.calcServiceFee(tempTotal, NetworkServiceFee);
         totalPrice += _foodiezHelpers.calcDriverFlatFee(tempTotal, DeliveryFlatFee);
         
-        return ( rest.rId, rest.restaurantAddress, m.name, totalPrice);
+        return (totalPrice);
     }
     
-    function createFoodOrder(string memory rId, address userAddress, address restaurantAddress, string memory itemName, uint totalPrice) public payable returns (string memory, string memory, uint, string memory){
+    function createFoodOrder(address userAddress, address restaurantAddress, string[] memory itemName, uint totalPrice) public payable OnlyParent returns (string memory, string memory){
         
         /****** create unique userOrderId*****/
         // get user data 
-        User memory _regUser = registeredUserMapping[msg.sender];
+        // User memory _regUser = registeredUserMapping[userAddress];
         
-        string memory orderNumString = _foodiezHelpers.uint2str(orderTotalCount);
-        string memory uniqueUserOrderId = string(abi.encodePacked(_regUser.name, orderNumString));
+        uint256 count =  userOrderCount[userAddress];
+        string memory orderNumString = _foodiezHelpers.uint2str(count);
+        string memory uniqueUserOrderId = string(abi.encodePacked( registeredUserMapping[userAddress].userId, orderNumString) );
+
+        count++;
         orderTotalCount++;
-        
-        return _foodiezOrders.createFoodOrderEntry(uniqueUserOrderId, rId, restaurantAddress, userAddress, itemName, totalPrice);
-        
+        userOrderCount[userAddress] = count;
+
+        return _foodiezOrders.createFoodOrderEntry(uniqueUserOrderId, RestaurantMapping[restaurantAddress].rId, restaurantAddress, userAddress, itemName, totalPrice);
+    }
+
+    function getUserOrders(address _userAddress) public view OnlyParent returns (uint256){
+        return userOrderCount[_userAddress];
     }
     
     function addRestaurantRating(address _restaurantAddress, uint _restaurantRating) public OnlyParent {
@@ -321,21 +330,12 @@ contract FoodiezRegistration {
         return orderTotalCount;
     }
     
-    function incrementOrderCount() public {
-        orderTotalCount++;
+    function checkIsStringEmpty(string memory stringToTest) internal pure returns (bool){
+        bytes memory checkString = bytes(stringToTest);
+        if(checkString.length == 0){
+            return true;
+        }else{
+            return false;
+        }
     }
-    
-    function getUserTypeFriendly(uint8 _usrType) internal pure returns (string memory userType) {
-        
-        if(UserType.Customer == UserType(_usrType) ) return "Customer";
-        if(UserType.Delivery == UserType(_usrType)) return "Delivery";
-    }
-    
-    function getMenuTypeFriendly(uint8 _menuType) internal pure returns (string memory userType) {
-        
-        if(MenuType.Appetizer == MenuType(_menuType) ) return "Appetizer";
-        if(MenuType.Main == MenuType(_menuType) ) return "Main";
-        if(MenuType.Desert == MenuType(_menuType)) return "Desert";
-    }
-    
 }

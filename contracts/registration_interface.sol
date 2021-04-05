@@ -6,9 +6,9 @@ interface FoodiezRegistrationInterface {
 
     function setParentContract(address _address) external returns(string memory);
 
-    function userRegistration(address _address, string memory name, uint uType) external returns (bool);
+    function userRegistration(address _address, string memory name, string memory userId, uint uType) external returns (bool);
      
-    function getUserInfo(address _address) external view returns(string memory, address, string memory, uint );
+    function getUserInfo(address _address) external view returns(string memory, string memory, string memory, uint );
     
     // Restaurant and Items Registration 
     function createRestaurant(address _address, string memory _name, string memory _rId) external returns(bool);
@@ -22,10 +22,15 @@ interface FoodiezRegistrationInterface {
     function getTotalRestaurants() external view returns (uint256, address[] memory restAddresses);
     
     /*************Orders Functions********************************************************************/
-    function getOrderTotal(address _userAddress, address _address, uint _itemNum) external view  returns(string memory, address, string memory, uint);
+
+    function getOrderTotal(address _userAddress, address _address, uint[] calldata _itemNum) external view returns(uint);
+    // function getOrderTotal(address _userAddress, address _address, uint _itemNum) external view  returns(string memory, address, string memory, uint);
     
-    function createFoodOrder(string memory rId, address userAddress, address restaurantAddress, string memory itemName, uint totalPrice) external payable returns (string memory, string memory, uint, string memory);
+    function createFoodOrder(address userAddress, address restaurantAddress, string[] calldata itemName, uint totalPrice) external payable returns (string memory, string memory);
+    // function createFoodOrder(string memory rId, address userAddress, address restaurantAddress, string memory itemName, uint totalPrice) external payable returns (string memory, string memory);
     
+    function getUserOrders(address _userAddress) external view returns (uint256);
+
     function addRestaurantRating(address _restaurantAddress, uint _restaurantRating) external  ;
     
     function addDriverRating(address _address, uint _deliveryRating) external  ;
@@ -39,5 +44,4 @@ interface FoodiezRegistrationInterface {
     
     function getOrderCount() external view returns(uint);
     
-    function incrementOrderCount() external ;
 }

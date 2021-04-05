@@ -155,6 +155,7 @@ export class EthcontractService {
                     if (result.usrName != undefined && result.usrType != undefined) {
                         
                         dataObj['usrName'] = result.usrName;
+                        dataObj['usrId'] = result.usrId;
                         dataObj['usrType'] = result.usrType;
                         dataObj['rating'] = result.rating;
 
@@ -191,18 +192,18 @@ export class EthcontractService {
         }
     }
 
-    public registerUser(name, type, tokenAmt): any {
+    public registerUser(name, id, type, tokenAmt): any {
         const self: this = this;
 
         if (tokenAmt > 0) {
-            return this.foodiezInstance.methods.userRegister(name, type, tokenAmt).send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') })
+            return this.foodiezInstance.methods.userRegister(name, id, type, tokenAmt).send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') })
                 .then(function (result) {
                     return result;
                 }).catch((error) => {
                     return error;
                 });
         } else {
-            return this.foodiezInstance.methods.userRegister(name, type, tokenAmt).send({ from: this.activeAccount })
+            return this.foodiezInstance.methods.userRegister(name, id, type, tokenAmt).send({ from: this.activeAccount })
                 .then(function (result) {
                     return result;
                 }).catch((error) => {
@@ -211,10 +212,10 @@ export class EthcontractService {
         }
     }
 
-    public registerDriver(name, type, tokenAmt): any {
+    public registerDriver(name, id, type, tokenAmt): any {
         const self: this = this;
 
-        return this.foodiezInstance.methods.userRegister(name, type, tokenAmt)
+        return this.foodiezInstance.methods.userRegister(name, id, type, tokenAmt)
             .send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') })
             .then(function (result) {
                 return result;
@@ -245,7 +246,7 @@ export class EthcontractService {
     }
 
     public addMenuItem(name, type, price): any{
-        return this.foodiezInstance.methods.addMenuItems(name, type, price).send({ from: this.activeAccount }).then( function(result){
+        return this.foodiezInstance.methods.addMenuItems(name, type, window.web3.utils.toWei(price, 'ether')).send({ from: this.activeAccount }).then( function(result){
             return result;
         }).catch((error)=>{
             return error;
@@ -254,7 +255,11 @@ export class EthcontractService {
 
     public getMenuItem(address, itemNum): any {
         return this.foodiezInstance.methods.getRestaurantMenu(address, itemNum).call({ from: this.activeAccount }).then(function (result) {
-            return result;
+            let itemResult = {}
+            itemResult['itemName'] = result.itemName;
+            itemResult['itemType'] = result.itemType;
+            itemResult['itemPrice'] = window.web3.utils.fromWei(result.itemPrice);
+            return itemResult;
         }).catch((error) => {
             return error;
         });
@@ -262,15 +267,30 @@ export class EthcontractService {
 
     /*************Order methods**************************************************************************** */
 
-    public placeOrder(address, itemNum, tokenPay, price): any {
-        return this.foodiezInstance.methods.placeOrder(address, itemNum, tokenPay).send({ from: this.activeAccount, value: window.web3.utils.toWei(price, 'ether') }).then(function (result) {
+    public orderTotal(address, itemNum): any {
+        return this.foodiezInstance.methods.orderTotal(address, itemNum).call({ from: this.activeAccount}).then(function (result) {
+            return window.web3.utils.fromWei(result);
+        }).catch((error) => {
+            return error;
+        });
+    }
+    public placeOrder(address, itemNum, totalPrice, tokenPay): any {
+        return this.foodiezInstance.methods.placeOrder(address, itemNum, window.web3.utils.toWei(totalPrice), tokenPay).send({ from: this.activeAccount, value: window.web3.utils.toWei(totalPrice, 'ether') }).then(function (result) {
             return result;
         }).catch((error) => {
             return error;
         });
     }
 
-    public orderStatus(userOrderId): any {
+    public getUserOrders(): any {
+        return this.foodiezInstance.methods.getUserOrders().call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+
+    public getOrderStatus(userOrderId): any {
         return this.foodiezInstance.methods.getOrderStatus(userOrderId).call({ from: this.activeAccount }).then(function (result) {
             return result;
         }).catch((error) => {

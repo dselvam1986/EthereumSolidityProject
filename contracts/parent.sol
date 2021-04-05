@@ -30,7 +30,7 @@ contract Foodiez {
     event UserInfoEvent(string name, address usrAddress, string usrType, uint256 rating);
     event RestaurantRegistered(string restaurantName, address rAddress, bool isRegistered);
     event ItemAddedEvent(string restaurantId, string itemId, string itemName);
-    event OrderPlaced(string orderId, uint total, string orderStatus);
+    event OrderPlaced(string orderId, string orderStatus);
     event OrderAssignedToDriver(string orderId, address driverAddress, string orderStatus);
     event OrderDeliveredToUser(string orderId, address driverAddress, string orderStatus);
     event orderDeliveryConfirmedEvent(uint restaurantTotal, uint deliveryTotal);
@@ -109,7 +109,7 @@ contract Foodiez {
     }
     
     /*****************Registration of User ( customer and delivery ) and Restaurant *********************/
-    function userRegister(string memory name, uint uType, uint256 amountStake) public payable returns(bool isSuccess){
+    function userRegister(string memory name, string memory userId, uint uType, uint256 amountStake) public payable returns(bool isSuccess){
         if(uType == 1) { 
             require(msg.value >= 10 ether, "Delivery Agent must stake minimum 10 ether"); 
         }
@@ -120,12 +120,12 @@ contract Foodiez {
             tokenTransferFrom(owner, msg.sender, amountStake);
         }
         
-        bool isRegistered = _foodiezRegistration.userRegistration(msg.sender, name, uType); // setup token here
+        bool isRegistered = _foodiezRegistration.userRegistration(msg.sender, name, userId, uType); // setup token here
         emit UserRegisteredEvent( name, isRegistered);
         return isRegistered;
     }
     
-    function getUserInfo(address _address) public view returns (string memory usrName, address usrAddress, string memory usrType, uint256 rating){
+    function getUserInfo(address _address) public view returns (string memory usrName, string memory usrId, string memory usrType, uint256 rating){
         
         return _foodiezRegistration.getUserInfo(_address);
         
@@ -161,13 +161,16 @@ contract Foodiez {
     }
     
     /************Foodiez Orders Vars and Functions**********************/
-    function placeOrder(address _restaurantAddress, uint _itemNum, uint tokenPay) public payable returns (string memory uOrderId, string memory orderItemName, uint256 orderTotal, string memory orderStatus){
+    function orderTotal(address _restaurantAddress, uint[] memory _itemNum) public view returns (uint totalPrice){
         
-        (string memory rId, address restaurantAddress, string memory itemName, uint totalPrice) = _foodiezRegistration.getOrderTotal(msg.sender, _restaurantAddress, _itemNum);
+        return _foodiezRegistration.getOrderTotal(msg.sender, _restaurantAddress, _itemNum);
+    }
+
+    function placeOrder(address _restaurantAddress, string[] memory itemNames, uint totalPrice, uint tokenPay) public payable returns (string memory uOrderId, string memory orderStatus){
         
         //check for required ether 
         require(msg.value >= totalPrice || weiConverter(tokenPay) >= totalPrice , "Not enough monies to cover order amount.");
-        (string memory uniqueId, string memory oItemName, uint256 total, string memory status) = _foodiezRegistration.createFoodOrder(rId, msg.sender, restaurantAddress, itemName, totalPrice);
+        (string memory uniqueId, string memory status) = _foodiezRegistration.createFoodOrder(msg.sender, _restaurantAddress, itemNames, totalPrice);
         
         
         if(tokenPay > 0) {
@@ -175,17 +178,16 @@ contract Foodiez {
             // transfer(address(this), tokenPay);
         }
 
-        emit OrderPlaced(uniqueId, total, status);
-        return (uniqueId, oItemName, total, status);
+        emit OrderPlaced(uniqueId, status);
+        return (uniqueId, status);
     }
 
-    function getAllUserOrders(address _userAddress) public view returns (uint256 total){
-        return _foodiezOrders.getAllUserOrders(_userAddress);
+    function getUserOrders() public view returns (uint256){
+        (uint256 usrOrderCount) = _foodiezRegistration.getUserOrders(msg.sender);
+        return usrOrderCount;
     }
 
-    
-    
-    function getOrderStatus(string memory userOrderId) public view returns (string memory orderId, address userAddress, address driverAddress, string memory items, uint256 total, string memory status){
+    function getOrderStatus(string memory userOrderId) public view returns (string memory orderId, address userAddress, address driverAddress, string[] memory items, uint256 total, string memory status){
         return _foodiezOrders.getUserOrderStatus(userOrderId);
     }
     
