@@ -12,8 +12,7 @@ import { EthcontractService } from './ethContract.service';
   imports: [
     BrowserModule,
     FormsModule,
-    CommonModule,
-
+    CommonModule
   ],
   providers: [EthcontractService],
   bootstrap: [AppComponent]

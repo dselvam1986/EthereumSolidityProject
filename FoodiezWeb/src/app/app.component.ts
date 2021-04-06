@@ -14,14 +14,21 @@ export class AppComponent {
 
   public registerAsUser = false;
   public registerAsRestaurant = false;
+  public noItemSelected = true;
 
+  public noRegisterViewOn = false;
   public userViewOn = false;
+  public userOverviewOn = false;
   public userTypeCustomer = true;
+  public driverViewOn = false;
   public restViewOn = false;
+  public registerViewOn = false;
   public addingMenuItem = false;
   public showingMenu = false;
   public userRestsView = true;
   public userOrdersView = false;
+  public payOrderScreenOn = false;
+  public userOrdersListView = false;
 
   /********Order track var*************** */
   public restaurantChoosen = "";
@@ -53,6 +60,9 @@ export class AppComponent {
     activeOrders: 0,
     naviRestaurant: true
   }
+
+  userOrderViewArry = []; // empty at init. based on num of order push obj.
+  driverOrderViewArry = [];
 
   restaurantRegisterObj = {
     name:"",
@@ -95,6 +105,15 @@ export class AppComponent {
   menuItemArray = [];
   restaurantArray =[];
 
+  payOrderObj={
+    orderId: '',
+    total: 0,
+    tip: 0,
+    tokenTip: 0,
+    restRating: 0,
+    driverRating: 0
+  };
+
   constructor(private ethService: EthcontractService){}
 
   public async ngOnInit(){
@@ -133,15 +152,25 @@ export class AppComponent {
   }
 
   public changeUserView(isRestView){
+    console.log("changeUserView");
     if (isRestView){
       this.getAllRestaurant();
       this.userViewObj.naviRestaurant = true;
       this.userOrdersView = false;
       this.userRestsView = true;
+      this.menuItemArray = [];
+
     }else{
-      this.getAllUserOrders();
+      if (this.userViewObj.type == 'Customer'){
+        this.orderConfirmationScreen = false;
+        this.userOrdersView = true;
+        
+        this.getAllUserOrders();
+      }else{
+        // this.driverViewOn = true;
+        this.getAllOrders();
+      }  
       this.userViewObj.naviRestaurant = false;
-      this.userOrdersView = true;
       this.userRestsView = false;
     }
 
@@ -152,12 +181,15 @@ export class AppComponent {
   }
 
   public async checkAddressRegistration(address){
+    console.log("checkAddressRegistration");
     this.resetRegisterObj(3);
     if (address != '' && address != undefined){
       await this.ethService.checkAddressRegistration(address, true).then(async (data)=>{
         if (data.usrName !=undefined){
           // user identified. update view to User view based on type
           // console.log(data);
+          this.userOverviewOn = true;
+
           this.userViewObj.name = data.usrName;
           this.userViewObj.userId = data.usrId;
           this.userViewObj.type = data.usrType;
@@ -165,14 +197,30 @@ export class AppComponent {
           this.userViewObj.token = await this.ethService.getTokenBalance(address);
           
           if(data.usrType == 'Customer'){
+            this.userViewOn = true;
             this.userTypeCustomer = true;
-            this.getAllRestaurant();
-            this.getUserOrder();
+
+            this.userOrdersView = false;
+            this.driverViewOn = false;
+            this.noRegisterViewOn = false;
+            this.restViewOn = false;
+
+            this.getAllRestaurant(); // all rest 
+            this.getUserOrder(); // all orders by user.
+            
           }else{
+            // driver type so get all orders.
+            this.driverViewOn = true;
+
             this.userTypeCustomer = false;
+            this.userViewOn = false;
+            this.userOrdersView = false;
+            this.noRegisterViewOn = false;
+            this.restViewOn = false;
+            this.payOrderScreenOn = false;
+            this.getAllOrders()
           }
-          this.userViewOn = true;
-          this.restViewOn = false;
+         
 
         }else{
           await this.ethService.checkAddressRegistration(address, false).then( async(data) => {
@@ -186,24 +234,29 @@ export class AppComponent {
               this.restViewObj.token = await this.ethService.getTokenBalance(address);
 
               this.restViewOn = true;
+
+              this.noRegisterViewOn = false;
+              this.driverViewOn = false;
               this.userViewOn = false;
+              this.userOverviewOn = false;
+              this.payOrderScreenOn = false;
 
             }else{
               let res = this.errorHandler(data);
               if (res.code == -32000){
                 console.log("Restaurant not Found")
+                this.noRegisterViewOn = true;
+
+                this.driverViewOn = false;
                 this.userViewOn = false;
                 this.restViewOn = false;
-                this.registerAsRestaurant = false;
-                this.registerAsUser = false;
+                this.userOverviewOn = false;
+                this.payOrderScreenOn = false;
               }
             }
-            
-
-            // restaurant identified. change view to restaurant.
-          })
+          });
         }
-      })
+      });
     }
   }
 
@@ -285,6 +338,7 @@ export class AppComponent {
   }
 
   public async getRestaurantMenuView(){
+    console.log("getRestaurantMenuView");
     const self: this = this;
 
       let numOfItem = Number(this.restViewObj.items);
@@ -300,6 +354,7 @@ export class AppComponent {
   }
 
   public async getRestaurantMenu(address, numItems) {
+    console.log("getRestaurantMenu");
     this.menuItemArray = [];
 
     if (address != null || address != '') {
@@ -313,11 +368,10 @@ export class AppComponent {
       }
       this.restaurantChoosen = address;
     }
-
   }
 
   public async createRestaurantMenuItem() {
-
+    console.log("createRestaurantMenuItem");
     if(this.menuItemRegisterObj.name.trim() == "" ){
       this.menuItemRegisterObj.nameError = true;
       return;
@@ -346,6 +400,7 @@ export class AppComponent {
   }
 
   public async getUserOrderCount(){
+    console.log("getUserOrderCount");
     await this.ethService.registerUser(this.userRegisterObj.fname, this.userRegisterObj.userId, this.userRegisterObj.type, this.userRegisterObj.token).then(async (result) => {
       if (result.status != undefined) {
         this.checkAddressRegistration(result.from);
@@ -356,6 +411,7 @@ export class AppComponent {
 
   /*************************Order Methods************************************************************************************** */
   public getAllRestaurant(){
+    console.log("getAllRestaurant");
     const self: this = this;
     self.restaurantArray = [];
     this.ethService.getAllRestaurants().then(async (result) => {
@@ -386,26 +442,36 @@ export class AppComponent {
   }
 
   public async getAllUserOrders(){
-
+    console.log("getAllUserOrders");
+    this.userOrderViewArry = [];
     for (var i = 0; i < this.userViewObj.activeOrders; i++){
       let uniqueId = this.userViewObj.userId + i;
 
       await this.ethService.getOrderStatus(uniqueId).then(async (result)=>{
-        console.log(result);
+        // console.log(result);
+        result['isSelected'] = false;
+        this.userOrderViewArry.push(result);
       })
-      
     }
+    this.userOrdersListView = true;
+    console.log(this.userOrderViewArry);
     
   }
 
   public addItemForOrder(index){
+    console.log("addItemForOrder");
     this.menuItemArray[index].isSelected = !this.menuItemArray[index].isSelected;
 
-    console.log(this.menuItemArray);
+    this.noItemSelected = true;
+    for (var i = 0; i < this.menuItemArray.length; i++) {
+      if (this.menuItemArray[i].isSelected) {
+        this.noItemSelected = false;
+      }
+    }
   }
 
   public async getOrderTotal(){
-
+    console.log("getOrderTotal");
     let itemNum = [];
     let total = 0;
 
@@ -433,12 +499,18 @@ export class AppComponent {
     })
   }
 
-  public navBackToMenuScreen(){
+  public navBackToMenuScreen(resetObj: boolean){
+    console.log("navBackToMenuScreen");
+    if(resetObj){
+      for (var i = 0; i < this.menuItemArray.length; i++) {
+        this.menuItemArray[i].isSelected = false;
+      }
+    }
     this.orderConfirmationScreen = false;
   }
 
   public async placeOrder() {
-
+    console.log("placeOrder");
     let itemNameArry = [];
     for (var i = 0; i < this.menuItemArray.length; i++) {
       if (this.menuItemArray[i].isSelected) {
@@ -449,6 +521,10 @@ export class AppComponent {
     await this.ethService.placeOrder(this.restaurantChoosen, itemNameArry, this.orderTotals.final, 0).then(async (result) => {
       if (result.status != undefined) {
         console.log(result);
+
+        this.navBackToMenuScreen(true);
+        this.noItemSelected = true;
+        this.getUserOrder();
         // reset obj
       } else {
         // error
@@ -458,7 +534,7 @@ export class AppComponent {
   }
 
   public async getUserOrder() {
-
+    console.log("getUserOrder");
     await this.ethService.getUserOrders().then(async (result) => {
       if (result != undefined) {
         this.userViewObj.activeOrders = result;
@@ -471,6 +547,90 @@ export class AppComponent {
     })
   }
 
+  /*************************Driver Methods************************************************************************************** */
+  public async getAllOrders(){
+    console.log("getAllOrders");
+    this.driverOrderViewArry = [];
+    await this.ethService.getAllOrder().then(async (result) => {
+      if (result != undefined) {
+        if (result.length > 0){
+          let allOrder = result;
+
+          for(var i = 0; i < allOrder.length; i++){
+            await this.ethService.getOrderStatus(allOrder[i]).then(async (orders)=>{
+              orders['driverAddressLC'] = orders.driverAddress.toLowerCase();
+              console.log(orders);
+              console.log(orders.driverAddress);
+              console.log(this.currentAccount);
+              
+              this.driverOrderViewArry.push(orders);
+            })
+          }
+        }
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public async assignToDriver(userOrderId){
+    await this.ethService.driverAssign(userOrderId).then(async (result) => {
+      if (result != undefined) {
+        
+        console.log(result);
+        this.getAllOrders();
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public async driverDelivered(userOrderId) {
+    await this.ethService.driverDeliveredOrder(userOrderId).then(async (result) => {
+      if (result != undefined) {
+
+        console.log(result);
+        this.getAllOrders();
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
+
+  public payOrderView(orderObj){
+    console.log("orderObj");
+    this.payOrderScreenOn = true;
+    this.userOrdersListView = false;
+
+    this.payOrderObj.orderId = orderObj.orderId;
+    this.payOrderObj.total = orderObj.ethTotal;
+
+  }
+
+  public navBackToConfirmationScreen() {
+    console.log("navBackToConfirmationScreen");
+    this.payOrderScreenOn = false;
+    this.changeUserView(false);
+  }
+
+  public async orderDeliveryConfirm(userOrderId, restRating, DriverRating, tip, tokenTip) {
+    await this.ethService.orderDeliveredConfirm(userOrderId, restRating, DriverRating, tip, tokenTip).then(async (result) => {
+      if (result != undefined) {
+
+        console.log(result);
+        this.getAllOrders();
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
+  }
 
   public errorHandler(errorMessage) {
     let string = errorMessage.toString();

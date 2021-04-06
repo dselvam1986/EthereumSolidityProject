@@ -53,6 +53,7 @@ contract FoodiezOrders {
      mapping(address => Order) DriverOrderAssignment; // order assigned to driver. 
      mapping(string => uint256) OrderIdTokenPay;
      
+     string[] AllOrderIds;
      uint256 orderTotalCount = 0;
      
      uint NetworkServiceFee = 2;
@@ -71,6 +72,7 @@ contract FoodiezOrders {
 
         Order memory order = Order(_uniqueUserOrderId, _rId, _restaurantAddress, _userAddress,address(0x0), _itemName, _total, OrderStatus(0));
         UserOrders[_uniqueUserOrderId] = order;
+        AllOrderIds.push(_uniqueUserOrderId);
 
         return( order.orderId, getOrderStatusFriendly(uint8(order.status)) );
     }
@@ -79,6 +81,10 @@ contract FoodiezOrders {
         Order memory order = UserOrders[userOrderId];
         
         return (order.orderId, order.userAddress, order.driverAddress, order.items, order.total, getOrderStatusFriendly(uint8(order.status)));
+    }
+
+    function getAllOrder() public view OnlyParent returns( string[] memory allOrders){
+        return AllOrderIds;
     }
      
      

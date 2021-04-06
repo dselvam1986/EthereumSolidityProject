@@ -6,7 +6,9 @@
   <!-- <link rel="icon" type="image/png" href="./images/name.svg"> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css" rel="stylesheet">\
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
 </head>
 
 <body>
@@ -27,7 +29,7 @@
           <p class="info-text alert alert-primary">Account Address: <span>{{ethService.activeAccount}}</span></p>
         </div>
       </div>
-      <ng-container *ngIf="userViewOn ">
+      <ng-container *ngIf="userOverviewOn ">
         <div class="row justify-content-md-center">
           <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
             <p class="info-text alert alert-primary">User Name: <span> {{userViewObj.name}}</span></p>
@@ -53,7 +55,7 @@
           </ng-container>
         </div>
       </ng-container>
-      <ng-container *ngIf="restViewOn ">
+      <ng-container *ngIf="restViewOn">
         <div class="row justify-content-md-center">
           <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
             <p class="info-text alert alert-primary">Restaurant Id: <span> {{restViewObj.id}}</span></p>
@@ -70,40 +72,53 @@
         </div>
       </ng-container>
     </section>
- 
-    <section>
-      <div class="row justify-content-md-center d-flex" id="mainBody">
+
+    <section id="navHeader" *ngIf="ethService.ethereumConnected ">
+      <div class="row justify-content-md-center d-flex">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+          <div class="card">
+            <div class="card-body navDivAlign" *ngIf="userViewOn || driverViewOn">
+              <ul class="navContain nav-tabs">
+                <li class="navButtons" *ngIf="userTypeCustomer">
+                  <button [ngClass]="{navButtonBGColorSelected: userViewObj.naviRestaurant == true }"
+                    class="btn navButtonBGColor btn-lg btn-block mb-3" (click)="changeUserView(true)">
+                    Restaurants
+                  </button>
+                </li>
+                <li class="navButtons">
+                  <button [ngClass]="{navButtonBGColorSelected: userViewObj.naviRestaurant == false }"
+                    class="btn navButtonBGColor btn-lg btn-block mb-3" (click)="changeUserView(false)">
+                    Orders
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="main">
+      <div class="row justify-content-md-center d-flex">
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
           <div class="card">
             <div class="card-body navDivAlign">
-              <ul class="navContain nav-tabs" *ngIf="ethService.ethereumConnected">
-                <li class="navButtons">
-                  <button [ngClass]="{navButtonBGColorSelected: userViewObj.naviRestaurant == true }" 
-                    class="btn navButtonBGColor btn-lg btn-block mb-3" (click)="changeUserView(true)">
-                  Restaurants 
-                </button>
-                </li>
-                <li class="navButtons">
-                <button [ngClass]="{navButtonBGColorSelected: userViewObj.naviRestaurant == false }" 
-                  class="btn navButtonBGColor btn-lg btn-block mb-3" (click)="changeUserView(false)">
-                  Orders 
-                </button>
-                </li>
-              </ul>
 
-              <ng-container *ngIf="!ethService.ethereumConnected">
+              <ng-container>
                 <ng-container>
                   <h4 class="card-title" *ngIf="!ethService.ethereumConnected">Connect to Network</h4>
                   <button class="btn btn-primary btn-lg btn-block mb-3" [hidden]="ethService.ethereumConnected"
                     (click)="connectToMetaMask()">Connect </button>
                 </ng-container>
-                <ng-container *ngIf="ethService.ethereumConnected && !userViewOn && !restViewOn">
+              
+                <ng-container *ngIf="ethService.ethereumConnected && noRegisterViewOn">
                   <h2 class="text-center">Join Foodiez</h2>
                   <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('user')">Register as User
                   </button>
                   <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('restaurant')">Register
                     as Restaurant </button>
                 </ng-container>
+              
                 <ng-container *ngIf="registerAsUser && !userViewOn && !restViewOn">
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <label class="small center-block text-center">Full Name</label>
@@ -114,7 +129,7 @@
                     <label for="lastName" class="small center-block text-center">User Id</label>
                     <input type="text" name="lastName" [(ngModel)]="userRegisterObj.userId" />
                     <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
-                                                                                               [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                                                                                                                         [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
                   </div>
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <label for="lastName" class="small center-block text-center">User Type</label>
@@ -135,17 +150,19 @@
                     </button>
                   </div>
                 </ng-container>
+              
                 <ng-container *ngIf="registerAsRestaurant && !userViewOn && !restViewOn">
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <label class="small center-block text-center">Restaurant Name</label>
-                    <input style="text-transform: capitalize;" type="text" name="firstName" [(ngModel)]="restaurantRegisterObj.name" />
+                    <input style="text-transform: capitalize;" type="text" name="firstName"
+                      [(ngModel)]="restaurantRegisterObj.name" />
                     <!-- <div *ngIf="f.submitted && !firstName.valid" class="help-block text-center">First Name is required</div> -->
                   </div>
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <label for="lastName" class="small center-block text-center">Restaurant Id</label>
                     <input type="text" name="lastName" [(ngModel)]="restaurantRegisterObj.id" />
                     <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
-                                                                                                             [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                                                                                                                                       [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
                   </div>
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
@@ -163,10 +180,13 @@
 
               <ng-container *ngIf="userViewOn">
                 <ng-container *ngIf="userRestsView && !orderConfirmationScreen">
-                  <h2 class="text-center">Available Restaurant</h2>
+                  <!-- <h5 class="text-center">Available Restaurant</h5> -->
                   <div class="container flexContain restNameBox">
+                    <ng-container *ngIf="restaurantArray.length == 0">
+                      <h5 class="text-center">No Restaurants available.</h5>
+                    </ng-container>
                     <ng-container *ngFor="let rest of restaurantArray">
-                      <div class="leftDiv col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+                      <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
                         <button type="submit" [disabled]="loading" (click)="getRestaurantMenu(rest.address, rest.items)"
                           class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">{{rest.id}}
                         </button>
@@ -203,19 +223,19 @@
                       </ng-container>
                       <ng-container>
                         <div class="container flexContain">
-                          <button type="submit" [disabled]="loading" (click)="getOrderTotal()"
+                          <button type="submit" [disabled]="noItemSelected" (click)="getOrderTotal()"
                             class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Continue
                           </button>
                         </div>
                       </ng-container>
                     </div>
-                
+              
                   </ng-container>
                 </ng-container>
                 <!----Order Confirmation Screen----------------------->
                 <ng-container *ngIf="userViewOn && orderConfirmationScreen">
                   <div class="container">
-                
+              
                     <div class="col-xl-12 orderConfirmationTitleAlign">
                       <button class="btn btn-secondary" (click)="navBackToMenuScreen()">
                         Return to Menu
@@ -230,7 +250,7 @@
                         Price
                       </div>
                     </div>
-                
+              
                     <ng-container *ngFor="let item of menuItemArray; let i = index">
                       <ng-container *ngIf="item.isSelected">
                         <div class="col-xl-12 flexContain restarantOrderAlign">
@@ -244,7 +264,7 @@
                       </ng-container>
                     </ng-container>
                   </div>
-                
+              
                   <ng-container>
                     <div class="col-xl-12 flexContain">
                       <div class="col-xl-5"></div>
@@ -273,9 +293,118 @@
                     </div>
                   </ng-container>
                 </ng-container>
-
+              
                 <ng-container *ngIf="userOrdersView">
+                  <ng-container *ngIf="userOrdersListView">
+                    <ng-container *ngIf="userOrderViewArry.length == 0">
+                      <h5 id="userViewOrders">No Orders found.</h5>
+                    </ng-container>
+                    <ng-container *ngFor="let order of userOrderViewArry">
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="UserOrderView">
+                          <button class="accordion-button" [ngClass]="{collapsed: order.isSelected}" type="button"
+                            (click)="order.isSelected = !order.isSelected">
+                            <div class="col-xl-3">{{order.orderId}}</div>
+                            <div class="col-xl-8 userOrderTitleStatus">{{order.status}}</div>
+                          </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show">
+                          <div class="accordion-body" *ngIf="order.isSelected">
+                            <div class="flexContain">
+                              <div class="col-xl-6"> Items</div>
+                              <div class="col-xl-3 userOrderPrice"> Total</div>
+                              <div class="col-xl-3"></div>
+                            </div>
+                            <ng-container *ngFor="let item of order.items">
+                              <div class="flexContain">
+                                <div class="col-xl-6">{{item}}</div>
+                                <div class="col-xl-3"></div>
+                                <div class="col-xl-3"></div>
+                              </div>
+                            </ng-container>
+                            <div class="flexContain">
+                              <div class="col-xl-6"></div>
+                              <div class="col-xl-3 userOrderPrice">{{order.ethTotal}}</div>
+                              <div class="col-xl-3">
+                                <ng-container *ngIf="order.status == 'Delivered'">
+                                  <button class="btn btn-secondary" (click)="payOrderView(order.orderId)">Pay Order</button>
+                                </ng-container>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </ng-container>
 
+                  <ng-container *ngIf="payOrderScreenOn">
+                    <div class="container">
+                  
+                      <div class="col-xl-12 orderConfirmationTitleAlign">
+                        <button class="btn btn-secondary" (click)="navBackToConfirmationScreen()">
+                          Return to Orders
+                        </button>
+                        <h2>Pay Order</h2>
+                      </div>
+                      <div>{{payOrderObj.orderId}}</div>
+                      <div>{{payOrderObj.total}}</div>
+                    </div>
+                      
+                  </ng-container>
+
+                </ng-container>
+              </ng-container>
+              
+              <ng-container *ngIf="driverViewOn">
+                <ng-container *ngIf="driverViewOn">
+                  <ng-container *ngIf="driverOrderViewArry.length == 0">
+                    <h5 id="driverViewOrders">No Orders found.</h5>
+                  </ng-container>
+                  <ng-container *ngFor="let order of driverOrderViewArry">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="DriverView">
+                        <button class="accordion-button" [ngClass]="{collapsed: order.isSelected}" type="button"
+                          (click)="order.isSelected = !order.isSelected">
+                          <div class="col-xl-3">{{order.orderId}}</div>
+                          <div class="col-xl-8 userOrderTitleStatus">{{order.status}}</div>
+                        </button>
+                      </h2>
+                      <div id="collapseOne" class="accordion-collapse collapse show">
+                        <div class="accordion-body" *ngIf="order.isSelected">
+                          <div class="flexContain">
+                            <div class="col-xl-6"> Items</div>
+                            <div class="col-xl-3 userOrderPrice"> Total</div>
+                            <div class="col-xl-3"></div>
+                          </div>
+                          <ng-container *ngFor="let item of order.items">
+                            <div class="flexContain">
+                              <div class="col-xl-6">{{item}}</div>
+                              <div class="col-xl-3"></div>
+                              <div class="col-xl-3"></div>
+                            </div>
+                          </ng-container>
+                          <div class="flexContain">
+                            <div class="col-xl-6"></div>
+                            <div class="col-xl-3 userOrderPrice">{{order.ethTotal}}</div>
+                            <div class="col-xl-3">
+                              <ng-container *ngIf="order.driverAddress == '0x0000000000000000000000000000000000000000'">
+                                <button class="btn btn-secondary" (click)="assignToDriver(order.orderId)">Assign To Driver</button>
+                              </ng-container>
+                              <ng-container *ngIf="order.driverAddressLC === currentAccount && order.status != 'Delivered'">
+                                <button class="btn btn-secondary" (click)="driverDelivered(order.orderId)">Set to Delivered</button>
+                              </ng-container>
+                              <ng-container *ngIf="order.driverAddressLC != currentAccount">
+                                <button class="btn btn-secondary">Assigned to another driver</button>
+                              </ng-container>
+                              <ng-container>
+                
+                              </ng-container>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
                 </ng-container>
               </ng-container>
               
@@ -330,8 +459,7 @@
                       </div>
                       <div class="input-wrap row justify-content-md-center d-flex">
                         <button type="submit" [disabled]="loading" (click)="createRestaurantMenuItem()"
-                          class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img
-                            *ngIf="loading"
+                          class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img *ngIf="loading"
                             src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
                         </button>
                       </div>
@@ -362,6 +490,7 @@
       </div>
     </section>
   </main>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
 </body>

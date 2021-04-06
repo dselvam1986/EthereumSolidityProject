@@ -131,29 +131,16 @@ export class EthcontractService {
         this.accountChangeSubject.next(window.web3.currentProvider.selectedAddress);
     }
 
-    public async getAccountsBalance(){
-        // console.log(this.web3.currentProvider);
-        let balance = await window.web3.eth.getBalance(this.activeAccount);
-        return window.web3.utils.fromWei(balance);
-    }
-
-    public getTokenBalance(address): any {
-        // console.log(this.web3.currentProvider);
-        return this.foodiezInstance.methods.getTokenBalanceOf(address).call().then( function(result){
-            return result;
-        })
-    }
-
-    public checkAddressRegistration(address: string, isUser: boolean): any{
+    public checkAddressRegistration(address: string, isUser: boolean): any {
         const self: this = this;
 
         let dataObj = {};
-        if(isUser){
+        if (isUser) {
             if (address != undefined && address != '') {
                 return this.foodiezInstance.methods.getUserInfo(address).call().then(function (result) {
                     // check if result is data value or its its a error
                     if (result.usrName != undefined && result.usrType != undefined) {
-                        
+
                         dataObj['usrName'] = result.usrName;
                         dataObj['usrId'] = result.usrId;
                         dataObj['usrType'] = result.usrType;
@@ -167,29 +154,42 @@ export class EthcontractService {
                             return usrErr;
                         }
                     }
-                }).catch((error)=>{
+                }).catch((error) => {
                     // console.log(error);
                     return error;
                 });
             }
-        }else{
+        } else {
             return this.foodiezInstance.methods.getrestaurantInfo(address).call().then(function (result) {
                 if (result.rId != undefined && result.rItems != undefined) {
                     dataObj['rId'] = result.rId;
                     dataObj['rItems'] = result.rItems;
                     dataObj['rating'] = result.rating;
                     return dataObj;
-                }else{
+                } else {
                     let usrErr = self.errorHandler(result);
                     if (usrErr.code == -32000) {
                         return usrErr;
                     }
                 }
-            }).catch((error)=>{
+            }).catch((error) => {
                 // console.log(error);
                 return error;
             });
         }
+    }
+
+    public async getAccountsBalance(){
+        // console.log(this.web3.currentProvider);
+        let balance = await window.web3.eth.getBalance(this.activeAccount);
+        return window.web3.utils.fromWei(balance);
+    }
+
+    public getTokenBalance(address): any {
+        // console.log(this.web3.currentProvider);
+        return this.foodiezInstance.methods.getTokenBalanceOf(address).call().then( function(result){
+            return result;
+        })
     }
 
     public registerUser(name, id, type, tokenAmt): any {
@@ -290,8 +290,17 @@ export class EthcontractService {
         });
     }
 
+    public getAllOrder(): any {
+        return this.foodiezInstance.methods.getAllOrders().call({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
+    }
+
     public getOrderStatus(userOrderId): any {
         return this.foodiezInstance.methods.getOrderStatus(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+            result['ethTotal'] = window.web3.utils.fromWei(result.total);
             return result;
         }).catch((error) => {
             return error;
@@ -299,7 +308,7 @@ export class EthcontractService {
     }
     //assignToDriver
     public driverAssign(userOrderId): any {
-        return this.foodiezInstance.methods.assignToDriver(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+        return this.foodiezInstance.methods.assignToDriver(userOrderId).send({ from: this.activeAccount }).then(function (result) {
             return result;
         }).catch((error) => {
             return error;
@@ -307,7 +316,7 @@ export class EthcontractService {
     }
     //driverDelieveredOrder
     public driverDeliveredOrder(userOrderId): any {
-        return this.foodiezInstance.methods.driverDelieveredOrder(userOrderId).call({ from: this.activeAccount }).then(function (result) {
+        return this.foodiezInstance.methods.driverDelieveredOrder(userOrderId).send({ from: this.activeAccount }).then(function (result) {
             return result;
         }).catch((error) => {
             return error;
@@ -315,7 +324,7 @@ export class EthcontractService {
     }
     
     //orderDeliveryConfirmed
-    public orderDelievered(userOrderId, restRating, userRating, tip, tokenTip): any {
+    public orderDeliveredConfirm(userOrderId, restRating, userRating, tip, tokenTip): any {
         return this.foodiezInstance.methods.orderDeliveryConfirmed(userOrderId, restRating, userRating, tokenTip).send({ from: this.activeAccount, value: window.web3.utils.toWei(tip, 'ether')}).then(function (result) {
             return result;
         }).catch((error) => {

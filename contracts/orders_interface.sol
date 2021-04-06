@@ -13,4 +13,5 @@ interface FoodiezOrdersInterface {
     function orderDeliveryConfirmed(string memory userOrderId ) external returns (address, address, address, uint );
     function setTokenPayOrder(string memory _uniqueOrderId, uint256 tokenPay) external;
     function getTokenPayOrder(string memory _uniqueOrderId) external view returns(uint256);
+    function getAllOrder() external view returns( string[] calldata allOrders);
 }

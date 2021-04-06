@@ -187,6 +187,10 @@ contract Foodiez {
         return usrOrderCount;
     }
 
+    function getAllOrders() public view returns (string[] memory allOrders){
+        return _foodiezOrders.getAllOrder();
+    }
+
     function getOrderStatus(string memory userOrderId) public view returns (string memory orderId, address userAddress, address driverAddress, string[] memory items, uint256 total, string memory status){
         return _foodiezOrders.getUserOrderStatus(userOrderId);
     }
