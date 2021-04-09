@@ -108,10 +108,10 @@ export class AppComponent {
   payOrderObj={
     orderId: '',
     total: 0,
-    tip: 0,
+    driverTip: 0,
     tokenTip: 0,
-    restRating: 0,
-    driverRating: 0
+    restRating: '',
+    driverRating: ''
   };
 
   constructor(private ethService: EthcontractService){}
@@ -204,6 +204,8 @@ export class AppComponent {
             this.driverViewOn = false;
             this.noRegisterViewOn = false;
             this.restViewOn = false;
+            this.registerAsUser = false;
+            this.registerAsRestaurant = false;
 
             this.getAllRestaurant(); // all rest 
             this.getUserOrder(); // all orders by user.
@@ -218,6 +220,8 @@ export class AppComponent {
             this.noRegisterViewOn = false;
             this.restViewOn = false;
             this.payOrderScreenOn = false;
+            this.registerAsUser = false;
+            this.registerAsRestaurant = false;
             this.getAllOrders()
           }
          
@@ -240,6 +244,8 @@ export class AppComponent {
               this.userViewOn = false;
               this.userOverviewOn = false;
               this.payOrderScreenOn = false;
+              this.registerAsUser = false;
+              this.registerAsRestaurant = false;
 
             }else{
               let res = this.errorHandler(data);
@@ -252,6 +258,8 @@ export class AppComponent {
                 this.restViewOn = false;
                 this.userOverviewOn = false;
                 this.payOrderScreenOn = false;
+                this.registerAsUser = false;
+                this.registerAsRestaurant = false;
               }
             }
           });
@@ -268,7 +276,7 @@ export class AppComponent {
   }
 
   public async registerUser() {
-
+    
     // check to make sure all fields are valid
     if (this.userRegisterObj.fname.trim() == '' || this.userRegisterObj.userId.trim() == ''){
       this.userRegisterObj.nameError = true;
@@ -288,6 +296,8 @@ export class AppComponent {
     if (this.userRegisterObj.type == 1){
       await this.ethService.registerDriver(this.userRegisterObj.fname, this.userRegisterObj.userId, this.userRegisterObj.type, this.userRegisterObj.token).then( async (result) => {
         if(result.status != undefined){
+          this.registerAsUser = false;
+          
           this.resetRegisterObj(1);
           this.checkAddressRegistration(result.from);
         }
@@ -322,6 +332,7 @@ export class AppComponent {
     await this.ethService.registerRestaurant(this.restaurantRegisterObj.name, this.restaurantRegisterObj.id, this.restaurantRegisterObj.token).then( async (result)=>{
       if (result.status != undefined){
         console.log(result);
+        this.registerAsRestaurant = false;
         this.resetRegisterObj(2);
         this.checkAddressRegistration(result.from);
       }else{
@@ -339,6 +350,7 @@ export class AppComponent {
 
   public async getRestaurantMenuView(){
     console.log("getRestaurantMenuView");
+    this.menuItemArray = [];
     const self: this = this;
 
       let numOfItem = Number(this.restViewObj.items);
@@ -618,11 +630,21 @@ export class AppComponent {
     this.changeUserView(false);
   }
 
-  public async orderDeliveryConfirm(userOrderId, restRating, DriverRating, tip, tokenTip) {
-    await this.ethService.orderDeliveredConfirm(userOrderId, restRating, DriverRating, tip, tokenTip).then(async (result) => {
+  public async orderDeliveryConfirm() {
+
+    let userOrderId = this.payOrderObj.orderId;
+    let restRating = this.payOrderObj.restRating;
+    let driverRating = this.payOrderObj.driverRating;
+    let driverTip = this.payOrderObj.driverTip;
+    let tokenTip = this.payOrderObj.tokenTip;
+
+    await this.ethService.orderDeliveredConfirm(userOrderId, restRating, driverRating, driverTip, tokenTip).then(async (result) => {
       if (result != undefined) {
 
-        console.log(result);
+        // console.log(result);
+        this.navBackToConfirmationScreen();
+        this.resetRegisterObj(3);
+        this.checkAddressRegistration(this.currentAccount);
         this.getAllOrders();
         // reset obj
       } else {
@@ -673,6 +695,17 @@ export class AppComponent {
 
       this.restaurantChoosen = '';
 
+    }else if(num == 3){
+      // 3 is order payments 
+      this.payOrderObj = {
+        orderId: '',
+        total: 0,
+        driverTip: 0,
+        tokenTip: 0,
+        restRating: '',
+        driverRating: ''
+      };
+
     }else{
       // menu obj
       this.menuItemRegisterObj = {
@@ -688,5 +721,22 @@ export class AppComponent {
       this.menuItemArray = [];
     }
 
+  }
+
+  public async sampleTokenTest(){
+    let sender = '0x204dBe0448667ffa72Cf0862769C53792Fe1a4ba';
+    let recipient = '0xf209a9506da30650d102e45e673de232a12dc5f7'
+    let token = 1;
+    await this.ethService.tokenTransferFrom(sender, recipient, token).then(async (result) => {
+      if (result != undefined) {
+
+        console.log(result);
+        this.getAllOrders();
+        // reset obj
+      } else {
+        // error
+        console.log("Error", result);
+      }
+    })
   }
 }

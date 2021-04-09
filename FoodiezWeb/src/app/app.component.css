@@ -10,6 +10,16 @@
 }
 
 /*******user View and Restaurant************************/
+.registerInput{
+    width: 70%;
+}
+.registerInputCaptalize{
+    text-transform: capitalize;
+}
+.registerSelect{
+    width: 70%;
+    height: 95%;
+}
 .restaurantMenuBtn {
     width: 167px
 }
@@ -93,4 +103,12 @@
 
 .userOrderTitleStatus,.userOrderPrice{
     text-align: right;
+}
+
+.payOrderButtonCenter{
+    margin-left: auto;
+    margin-right: auto;
+}
+.payOrderButtonAlign{
+    display: inline-block;
 }

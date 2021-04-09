@@ -2,7 +2,7 @@ const Foodiez = artifacts.require('Foodiez');
 const FoodiezToken = artifacts.require('FoodiezToken');
 const FoodiezHelpers = artifacts.require('FoodiezHelpers');
 const AssertionError = require('assertion-error');
-const { iteratee } = require('lodash');
+const { iteratee, subtract, add } = require('lodash');
 const truffleAssert = require('truffle-assertions');
 
 
@@ -12,6 +12,8 @@ contract('FoodiezTest', (accounts) => {
     let helper;
     let firstOrderId;
     let secondOrderId;
+    let firstOrderTotal;
+    let secondOrderTotal;
 
     const FoodzAccount = accounts[0];
     const customerOneAccount = accounts[1];
@@ -28,6 +30,10 @@ contract('FoodiezTest', (accounts) => {
 
         // approve foodz to allow transfer of tokens
         token.approve(foodz.address, 100, { from: FoodzAccount });
+        token.approve(foodz.address, 100, { from: customerOneAccount });
+        token.approve(foodz.address, 100, { from: customerTwoAccount });
+        token.approve(foodz.address, 100, { from: driverAccount });
+        token.approve(foodz.address, 100, { from: restaurantAccount });
     });
 
     it("test helper function of unit to string", async () => {
@@ -38,32 +44,36 @@ contract('FoodiezTest', (accounts) => {
     });
 
     it("should register a new customer from userAccount", async () => {
-        let responce = await foodz.userRegister("Dino Sel", 0, 0, { from: customerOneAccount });
+        let responce = await foodz.userRegister("Dino Sel", "dino", 0, 0, { from: customerOneAccount });
 
         // now retrieve the data. 
         var expectedName = "Dino Sel";
+        var expectedUserId = "dino"
         var expectedUsrType = "Customer";
         var expectedRating = 0;
+        var expectedToken = 10;
 
-        let { usrName, usrAddress, usrType, rating } = await foodz.getUserInfo(customerOneAccount);
+        let { usrName, usrId, usrType, rating } = await foodz.getUserInfo(customerOneAccount);
 
-        // console.log(usrName, usrAddress, usrType, rating);
         assert.equal(usrName, expectedName, "User name should be Dino Sel");
+        assert.equal(usrId, expectedUserId, "User Id should be dino");
         assert.equal(usrType, expectedUsrType, "User type should be Customer");
         assert.equal(rating.toNumber(), expectedRating, "User rating should be 0");
     });
 
     it("should register second customer with token", async () => {
-        let responce = await foodz.userRegister("Nis Sel", 0, 10, { from: customerTwoAccount, value: web3.utils.toWei('10', 'ether')  });
+        let responce = await foodz.userRegister("Nis Sel", "nsel", 0, 10, { from: customerTwoAccount, value: web3.utils.toWei('10', 'ether')  });
 
         // now retrieve the data. 
         var expectedName = "Nis Sel";
+        var expectedUserId = "nsel";
         var expectedUsrType = "Customer";
         var expectedRating = 0;
 
-        let { usrName, usrAddress, usrType, rating } = await foodz.getUserInfo(customerTwoAccount);
+        let { usrName, usrId, usrType, rating } = await foodz.getUserInfo(customerTwoAccount);
 
         assert.equal(usrName, expectedName, "User name should match");
+        assert.equal(usrId, expectedUserId, "User Id should match");
         assert.equal(usrType, expectedUsrType, "User type should be Customer");
         assert.equal(rating.toNumber(), expectedRating, "User rating should be 0");
     });
@@ -76,17 +86,19 @@ contract('FoodiezTest', (accounts) => {
     });
 
     it("should register a new driver from driverAccount", async () => {
-        let responce = await foodz.userRegister("John Ang", 1, 10, { from: driverAccount, value: web3.utils.toWei('10', 'ether') });
+        let responce = await foodz.userRegister("John Ang", "jang", 1, 10, { from: driverAccount, value: web3.utils.toWei('10', 'ether') });
 
         // // now retrieve the data. 
         var expectedName = "John Ang";
+        var expectedUserId = "jang";
         var expectedUsrType = "Delivery";
         var expectedRating = 0;
 
-        let { usrName, usrAddress, usrType, rating } = await foodz.getUserInfo(driverAccount);
+        let { usrName, usrId, usrType, rating } = await foodz.getUserInfo(driverAccount);
 
         // console.log(usrName, usrAddress, usrType, rating);
         assert.equal(usrName, expectedName, "Driver name should be John Ang");
+        assert.equal(usrId, expectedUserId, "Driver userId should be jang");
         assert.equal(usrType, expectedUsrType, "User type should be Delivery");
         assert.equal(rating.toNumber(), expectedRating, "Driver rating should be 0");
     });
@@ -144,24 +156,39 @@ contract('FoodiezTest', (accounts) => {
 
     /***********placing orders*****************************************/
 
-    it("customer should be able to place an order", async () => {
-        let responce = await foodz.placeOrder(restaurantAccount, 1, 0, { from: customerOneAccount, value: web3.utils.toWei('5.2', 'ether') });
+    it("customer one should be able to get order total", async () => {
+        
+        // test with apps and desert. price is 3 and 2 respectively. total 5.2 with fees. 
+        var items = [];
+        items.push(web3.utils.toBN(0));
+        items.push(web3.utils.toBN(2));
 
-        // console.log(responce);
-        // console.log(responce.logs[0].args);
-        let uniqueId = responce.logs[0].args.orderId;
-        let utotal = responce.logs[0].args.total;
-        let ustatus = responce.logs[0].args.orderStatus;
-        firstOrderId = uniqueId;
+        let orderTotal = await foodz.orderTotal(restaurantAccount, items, { from: customerOneAccount });
+        // console.log("Order total should be 5.2 and is: ", web3.utils.fromWei(orderTotal) );
 
-        // now retrieve the data. 3000000000000000000
-        let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(uniqueId);
+        firstOrderTotal = web3.utils.fromWei(orderTotal, 'ether');
+        var expectedTotal = 5.2
+        assert.equal(web3.utils.fromWei(orderTotal, 'ether'), expectedTotal, "Order total should be 5.2");
+    });
 
-        console.log("uTotal is: ", utotal);
-        console.log("Total is: ", total);
-        assert.equal(orderId, uniqueId, "Order ids do not match");
-        // assert.equal(total, utotal, "Order total is not matching");
-        assert.equal(status, ustatus, "Order status is not matching");
+    it("customer one should be able to place an order", async () => {
+        var itemNames = [];
+        itemNames.push("Chicken Sixty Five");
+        itemNames.push("Kulfi");
+
+        var totalPrice = web3.utils.toWei('5.2', 'ether');
+        var tokenPay = 0;
+
+        var expectedId = "dino0";
+        var expectedStatus = "Ordered";
+        let response = await foodz.placeOrder(restaurantAccount, itemNames, totalPrice, tokenPay, { from: customerOneAccount, value: totalPrice });
+        // console.log(response.logs);
+        var uOrderId = response.logs[0].args.orderId;
+        var orderStatus = response.logs[0].args.orderStatus;
+        
+        firstOrderId = response.logs[0].args.orderId; // set to use in next test. 
+        assert.equal(uOrderId, expectedId, "Order ids do not match");
+        assert.equal(orderStatus, expectedStatus, "Order status do not match");
     });
 
     it("order should be assigned to driver", async () => {
@@ -191,115 +218,130 @@ contract('FoodiezTest', (accounts) => {
         assert.equal(status, newOrderStatus, "Order status is not matching");
     });
 
-    it("customer accepts delivery and pays", async () => {
-
-        // check balances of customer and driver and restaurant
-        let preCustomerBalance = await web3.eth.getBalance(customerOneAccount);
-        let preCustomerToken = await foodz.getTokenBalanceOf(customerOneAccount)
-        let preDriverBalance = await web3.eth.getBalance(driverAccount);
-        let preRestaurantBalance = await web3.eth.getBalance(restaurantAccount);
-
-        console.log("User Balance", preCustomerBalance);
-        console.log("Driver Balance", preDriverBalance);
-        console.log("Restaurant Balance", preRestaurantBalance);
-        console.log("User Token pre pay", preCustomerToken);
-
-        let responce = await foodz.orderDeliveryConfirmed(firstOrderId, 5, 5, 0, { from: customerOneAccount, value: web3.utils.toWei("4", "ether") });
-
-        // console.log(responce);
-        // console.log(responce.logs[0].args);
-
-        let endCustomerBalance = await web3.eth.getBalance(customerOneAccount);
-        let postCustomerToken = await foodz.getTokenBalanceOf(customerOneAccount)
-        let endDriverBalance = await web3.eth.getBalance(driverAccount);
-        let endRestaurantBalance = await web3.eth.getBalance(restaurantAccount);
-
-        console.log("User new Balance", endCustomerBalance);
-        console.log("Driver new Balance", endDriverBalance);
-        console.log("Restaurant new Balance", endRestaurantBalance);
-        console.log("User Token pre pay", postCustomerToken);
-
-        // assert.equal(orderId, uniqueId, "Order ids do not match");
-        // assert.equal(total.toNumber(), utotal, "Order total is not matching");
-        // assert.equal(status, ustatus, "Order status is not matching");
-    });
-
-    /************************placing order and testing tokens************** */
-
-    // it("second customer should be able to place an order", async () => {
-    //     let responce = await foodz.placeOrder(restaurantAccount, 1, 0, { from: customerTwoAccount, value: web3.utils.toWei('5', 'ether') });
-
-    //     // console.log(responce.logs[0].args);
-    //     let uniqueId = responce.logs[0].args.orderId;
-    //     let utotal = responce.logs[0].args.total.toNumber();
-    //     let ustatus = responce.logs[0].args.orderStatus;
-    //     secondOrderId = uniqueId;
-
-    //     // now retrieve the data. 3000000000000000000
-    //     let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(uniqueId);
-
-    //     assert.equal(orderId, uniqueId, "Order ids do not match");
-    //     assert.equal(total.toNumber(), utotal, "Order total is not matching");
-    //     assert.equal(status, ustatus, "Order status is not matching");
-    // });
-
-    // it("second order should be assigned to driver", async () => {
-
-    //     let responce = await foodz.assignToDriver(secondOrderId, { from: driverAccount });
-    //     // console.log(responce.logs[0].args);
-
-    //     let assignedDriverAddress = responce.logs[0].args.driverAddress;
-    //     let newOrderStatus = responce.logs[0].args.orderStatus;
-
-    //     // now retrieve the data. 
-    //     let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(secondOrderId);
-
-    //     assert.equal(driverAddress, assignedDriverAddress, "Driver address is asigned");
-    //     assert.equal(status, newOrderStatus, "Order status is not matching");
-    // });
-
-    // it("second order should be delivered and status changed to delivered", async () => {
-    //     let responce = await foodz.driverDelieveredOrder(secondOrderId, { from: driverAccount });
-
-    //     // console.log(responce.logs[0].args);
-    //     let newOrderStatus = responce.logs[0].args.orderStatus;
-
-    //     // now retrieve the data.
-    //     let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(secondOrderId);
-
-    //     assert.equal(status, newOrderStatus, "Order status is not matching");
-    // });
-
-    // it("customer accepts second order delivery and pays and tips with token", async () => {
+    // it("customer accepts delivery and pays", async () => {
 
     //     // check balances of customer and driver and restaurant
-    //     let preCustomerBalance = await web3.eth.getBalance(customerTwoAccount);
-    //     let preCustomerToken = await foodz.getTokenBalanceOf(customerTwoAccount)
-    //     let preDriverBalance = await web3.eth.getBalance(driverAccount);
-    //     let preRestaurantBalance = await web3.eth.getBalance(restaurantAccount);
+    //     let preCustomerBalance = await web3.eth.getBalance(customerOneAccount) ;
+    //     let preDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
+    //     let preRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
 
-    //     console.log("User Balance", preCustomerBalance);
-    //     console.log("Driver Balance", preDriverBalance);
-    //     console.log("Restaurant Balance", preRestaurantBalance);
-    //     console.log("User Token pre pay", preCustomerToken);
+    //     let userTip = 3;
 
-    //     let responce = await foodz.orderDeliveryConfirmed(secondOrderId, 5, 5, 2, { from: customerTwoAccount, value: web3.utils.toWei("4", "ether") });
+    //     // console.log("User Balance", preCustomerBalance);
+    //     // console.log("Driver Balance", preDriverBalance);
+    //     // console.log("Restaurant Balance", preRestaurantBalance);
 
-    //     // console.log(responce);
-    //     // console.log(responce.logs[0].args);
+    //     let responce = await foodz.orderDeliveryConfirmed(firstOrderId, 5, 5, 0, { from: customerOneAccount, value: web3.utils.toWei('3', 'ether') });
 
-    //     let endCustomerBalance = await web3.eth.getBalance(customerTwoAccount);
-    //     let postCustomerToken = await foodz.getTokenBalanceOf(customerTwoAccount)
-    //     let endDriverBalance = await web3.eth.getBalance(driverAccount);
-    //     let endRestaurantBalance = await web3.eth.getBalance(restaurantAccount);
+    //     let restaurantTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.restaurantTotal, 'ether')));
+    //     let deliveryTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.deliveryTotal, 'ether')));
+    //     // let deliveryFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
+    //     // let serviceFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
+    //     // let totalFees = add(deliveryFee, serviceFee);
 
-    //     console.log("User new Balance", endCustomerBalance);
-    //     console.log("Driver new Balance", endDriverBalance);
-    //     console.log("Restaurant new Balance", endRestaurantBalance);
-    //     console.log("User Token pre pay", postCustomerToken);
+    //     // console.log("Full Total:", total)
+    //     // console.log("Rest total:",restaurantTotal);
+    //     // console.log("total fees:", totalFees);
 
-    //     // assert.equal(orderId, uniqueId, "Order ids do not match");
-    //     // assert.equal(total.toNumber(), utotal, "Order total is not matching");
-    //     // assert.equal(status, ustatus, "Order status is not matching");
+        
+    //     let expectedDriverBalance = add(preDriverBalance, deliveryTotal);
+    //     let expectedRestBalance = add(preRestaurantBalance, restaurantTotal);
+
+    //     let endDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
+    //     let endRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
+
+    //     // console.log("User new Balance", expectedCustomerBalance);
+    //     // // console.log("Driver new Balance", endDriverBalance);
+    //     // // console.log("Restaurant new Balance", endRestaurantBalance);
+
+    //     // assert.equal(endCustomerBalance, expectedCustomerBalance, "Customer Balance must match");
+    //     assert.equal(endDriverBalance, expectedDriverBalance, "Driver Balance must match");
+    //     assert.equal(endRestaurantBalance, expectedRestBalance, "Restaurant Balance must match");
+        
     // });
+
+    /************************placing order and testing tokens************** */
+    it("customer two should be able to get order total", async () => {
+
+        // test with apps and desert. price is 3 and 2 respectively. total 5.2 with fees. 
+        var items = [];
+        items.push(web3.utils.toBN(0));
+        items.push(web3.utils.toBN(2));
+
+        let orderTotal = await foodz.orderTotal(restaurantAccount, items, { from: customerTwoAccount });
+        // console.log("Order total should be 5.2 and is: ", web3.utils.fromWei(orderTotal) );
+
+        secondOrderTotal = web3.utils.fromWei(orderTotal, 'ether');
+        var expectedTotal = 5.2
+        assert.equal(web3.utils.fromWei(orderTotal, 'ether'), expectedTotal, "Order total should be 5.2");
+    });
+
+    it("customer two should be able to place an order", async () => {
+        var itemNames = [];
+        itemNames.push("Chicken Sixty Five");
+        itemNames.push("Kulfi");
+
+        var totalPrice = web3.utils.toWei('5.2', 'ether');
+        var tokenPay = 0;
+
+        var expectedId = "nsel0";
+        var expectedStatus = "Ordered";
+        let response = await foodz.placeOrder(restaurantAccount, itemNames, totalPrice, tokenPay, { from: customerTwoAccount, value: totalPrice });
+        // console.log(response.logs);
+        var uOrderId = response.logs[0].args.orderId;
+        var orderStatus = response.logs[0].args.orderStatus;
+
+        secondOrderId = response.logs[0].args.orderId; // set to use in next test.
+        assert.equal(uOrderId, expectedId, "Order ids do not match");
+        assert.equal(orderStatus, expectedStatus, "Order status do not match");
+    });
+
+    it("second order should be assigned to driver", async () => {
+
+        let responce = await foodz.assignToDriver(secondOrderId, { from: driverAccount });
+        // console.log(responce.logs[0].args);
+
+        let assignedDriverAddress = responce.logs[0].args.driverAddress;
+        let newOrderStatus = responce.logs[0].args.orderStatus;
+
+        // now retrieve the data. 
+        let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(secondOrderId);
+
+        assert.equal(driverAddress, assignedDriverAddress, "Driver address is asigned");
+        assert.equal(status, newOrderStatus, "Order status is not matching");
+    });
+
+    it("second order should be delivered and status changed to delivered", async () => {
+        let responce = await foodz.driverDelieveredOrder(secondOrderId, { from: driverAccount });
+
+        // console.log(responce.logs[0].args);
+        let newOrderStatus = responce.logs[0].args.orderStatus;
+
+        // now retrieve the data.
+        let { orderId, userAddress, driverAddress, items, total, status } = await foodz.getOrderStatus(secondOrderId);
+
+        assert.equal(status, newOrderStatus, "Order status is not matching");
+    });
+
+    it("customer accepts second order delivery and pays and tips with token", async () => {
+
+        // check balances of customer and driver and restaurant
+        let preCustomerToken = await foodz.getTokenBalanceOf(customerTwoAccount);
+        let preDriverToken = await foodz.getTokenBalanceOf(driverAccount);
+
+        // console.log("User Token", preCustomerToken);
+        // console.log("Driver Token", preDriverToken);
+
+        let responce = await foodz.orderDeliveryConfirmed(secondOrderId, 5, 5, 2, { from: customerTwoAccount });
+
+
+        var expectedCustomerToken = 8;
+        var expectedDriverToken = 12;
+
+        let postCustomerToken = await foodz.getTokenBalanceOf(customerTwoAccount);
+        let endDriverToken = await foodz.getTokenBalanceOf(driverAccount);
+
+        assert.equal(postCustomerToken, expectedCustomerToken, "Customer Token should match");
+        assert.equal(endDriverToken, expectedDriverToken, "Driver token should match");
+    });
 });

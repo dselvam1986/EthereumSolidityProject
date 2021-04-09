@@ -33,7 +33,7 @@ contract Foodiez {
     event OrderPlaced(string orderId, string orderStatus);
     event OrderAssignedToDriver(string orderId, address driverAddress, string orderStatus);
     event OrderDeliveredToUser(string orderId, address driverAddress, string orderStatus);
-    event orderDeliveryConfirmedEvent(uint restaurantTotal, uint deliveryTotal);
+    event orderDeliveryConfirmedEvent(uint total, uint restaurantTotal, uint deliveryTotal);
     
     event AccountApproved(address account, uint256 allowance);
     event AmountTransferedToAccount(address account, uint256 amount);
@@ -217,7 +217,7 @@ contract Foodiez {
         _foodiezRegistration.addDriverRating(deliveryAddress, _deliveryRating);
          
         // payment 
-        require(getTokenBalanceOf(msg.sender) >= tokenTip, "Not Enough tokens to tip.");
+        require(getTokenBalanceOf(userAddress) >= tokenTip, "Not Enough tokens to tip.");
         
         uint256 tokenPay = _foodiezOrders.getTokenPayOrder(userOrderId);
         
@@ -231,22 +231,28 @@ contract Foodiez {
         finalOrderTotal -= driverTotal; 
         
         
-        driverTotal += msg.value;
-        
-        // transfer driver money
-        payable(deliveryAddress).transfer(driverTotal);
+        driverTotal += msg.value; // adding tip from user to driver
+
+        // if token tip or token pay present make the transfer
         if(tokenTip > 0) {
             token.transferFrom(userAddress, deliveryAddress, tokenTip);
+            // token.transferFrom(userAddress, owner, tokenTip);
+            // token.transferFrom(owner, deliveryAddress, tokenTip);
         }
-        
-        // transfer rest money
         if(tokenPay > 0){
             token.transferFrom(userAddress, restaurantAddress, tokenPay);
-        }else {
-            payable(restaurantAddress).transfer(finalOrderTotal);   
+            // token.transferFrom(userAddress, owner, tokenTip);
+            // token.transferFrom(owner, restaurantAddress, tokenTip);
         }
+
+        // transfer all other monies
+        // transfer driver money
+        payable(deliveryAddress).transfer(driverTotal);
         
-        emit orderDeliveryConfirmedEvent(finalOrderTotal, driverTotal);
+        // transfer rest money
+        payable(restaurantAddress).transfer(finalOrderTotal);   
+        
+        emit orderDeliveryConfirmedEvent(total, finalOrderTotal, driverTotal);
     }
 
     

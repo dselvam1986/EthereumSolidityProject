@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 const Web3 = require('web3');
-let foodzJson = require('../../../build/contracts/Foodiez.json');
 var Contract = require('web3-eth-contract');
-let srcfoodzJson = require('../assets/Foodiez.json');
 const $ = require("jquery");
 // var $ = require( "jquery" );
 
@@ -79,12 +77,14 @@ export class EthcontractService {
             console.log(err);
         }).then(()=>{
             $.getJSON('../assets/Foodiez.json', function (data) {
+                console.log(data);
+                
                 try {
                     // Get the contract instance.
                     let deployedNetwork = data.networks[self.networkId];
 
                     self.foodiezInstance = new window.web3.eth.Contract(data.abi, deployedNetwork.address);
-                    console.log(self.foodiezInstance);
+                    // console.log(self.foodiezInstance._address);
                     // approve contract to transfer tokens
 
                 } catch (error) {
@@ -94,7 +94,7 @@ export class EthcontractService {
                 }
             });
             $.getJSON('../assets/FoodiezToken.json', function (data) {
-                console.log(data);
+                // console.log(data);
                 try {
                     // Get the contract instance.
                     let deployedNetwork = data.networks[self.networkId];
@@ -115,7 +115,7 @@ export class EthcontractService {
                         // console.log("Token Supply", data) 
                     });
                     
-                    console.log(self.foodiezTokenInstance);
+                    // console.log(self.foodiezTokenInstance);
                     // approve contract to transfer tokens
                 } catch (error) {
                     // Catch any errors for any of the above operations.
@@ -195,10 +195,18 @@ export class EthcontractService {
     public registerUser(name, id, type, tokenAmt): any {
         const self: this = this;
 
+        if(self.foodiezTokenInstance == undefined){
+            return;
+        }
         if (tokenAmt > 0) {
             return this.foodiezInstance.methods.userRegister(name, id, type, tokenAmt).send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') })
                 .then(function (result) {
-                    return result;
+                    // approve the owner on behalf of user. 
+                    return self.foodiezTokenInstance.methods.approve(self.foodiezInstance._address, tokenAmt).send({ from: self.activeAccount})
+                        .then(function(tokenResult) {
+                            console.log(tokenResult);
+                            return result;
+                        });
                 }).catch((error) => {
                     return error;
                 });
@@ -215,10 +223,17 @@ export class EthcontractService {
     public registerDriver(name, id, type, tokenAmt): any {
         const self: this = this;
 
+        if (self.foodiezTokenInstance == undefined) {
+            return;
+        }
         return this.foodiezInstance.methods.userRegister(name, id, type, tokenAmt)
             .send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether') })
             .then(function (result) {
-                return result;
+                return self.foodiezTokenInstance.methods.approve(self.foodiezInstance._address, tokenAmt).send({ from: self.activeAccount })
+                    .then(function (tokenResult) {
+                        console.log(tokenResult);
+                        return result;
+                    });
             }).catch((error) => {
                 return error;
             });
@@ -227,10 +242,17 @@ export class EthcontractService {
     public registerRestaurant(name, id, tokenAmt):any {
         const self: this = this;
 
+        if (self.foodiezTokenInstance == undefined) {
+            return;
+        }
         return this.foodiezInstance.methods.registerRestaurant(name, id, tokenAmt)
             .send({ from: this.activeAccount, value: window.web3.utils.toWei(tokenAmt, 'ether')})
             .then(function (result) {
-                return result;
+                return self.foodiezTokenInstance.methods.approve(self.foodiezInstance._address, tokenAmt).send({ from: self.activeAccount })
+                    .then(function (tokenResult) {
+                        console.log(tokenResult);
+                        return result;
+                    });
             }).catch((error) => {
                 return error;
             });
@@ -325,11 +347,20 @@ export class EthcontractService {
     
     //orderDeliveryConfirmed
     public orderDeliveredConfirm(userOrderId, restRating, userRating, tip, tokenTip): any {
-        return this.foodiezInstance.methods.orderDeliveryConfirmed(userOrderId, restRating, userRating, tokenTip).send({ from: this.activeAccount, value: window.web3.utils.toWei(tip, 'ether')}).then(function (result) {
-            return result;
-        }).catch((error) => {
-            return error;
-        });
+        if(tip > 0){
+            return this.foodiezInstance.methods.orderDeliveryConfirmed(userOrderId, restRating, userRating, tokenTip).send({ from: this.activeAccount, value: window.web3.utils.toWei(tip, 'ether') }).then(function (result) {
+                return result;
+            }).catch((error) => {
+                return error;
+            });
+        }else{
+            return this.foodiezInstance.methods.orderDeliveryConfirmed(userOrderId, restRating, userRating, tokenTip).send({ from: this.activeAccount }).then(function (result) {
+                return result;
+            }).catch((error) => {
+                return error;
+            });
+        }
+        
     }
 
     public errorHandler(errorMessage){
@@ -337,6 +368,15 @@ export class EthcontractService {
         let objIndex = string.indexOf('{');
         let objStr = string.substring(objIndex).trim()
         return JSON.parse(objStr);
+    }
+
+    
+    public tokenTransferFrom(sender, recipient, token){
+        return this.foodiezInstance.methods.tokenTransferFrom(sender, recipient, token).send({ from: this.activeAccount }).then(function (result) {
+            return result;
+        }).catch((error) => {
+            return error;
+        });
     }
 
 }

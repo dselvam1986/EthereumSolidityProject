@@ -42,7 +42,7 @@
               <p class="info-text alert alert-primary">User Token:<span> {{userViewObj.token}}</span></p>
             </div>
             <div class="col-xl-2 col-lg-6 col-md-12 col-sm-12 col-12">
-              <p class="info-text alert alert-primary">Active Order:<span> {{userViewObj.activeOrders}} </span></p>
+              <p class="info-text alert alert-primary">Orders:<span> {{userViewObj.activeOrders}} </span></p>
             </div>
           </ng-container>
           <ng-container *ngIf="!userTypeCustomer">
@@ -110,68 +110,97 @@
                   <button class="btn btn-primary btn-lg btn-block mb-3" [hidden]="ethService.ethereumConnected"
                     (click)="connectToMetaMask()">Connect </button>
                 </ng-container>
-              
+
                 <ng-container *ngIf="ethService.ethereumConnected && noRegisterViewOn">
                   <h2 class="text-center">Join Foodiez</h2>
-                  <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('user')">Register as User
+                  <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('user')">Register as
+                    User
                   </button>
                   <button class="btn btn-primary btn-lg btn-block mb-3" (click)="registerAddress('restaurant')">Register
                     as Restaurant </button>
                 </ng-container>
-              
+
                 <ng-container *ngIf="registerAsUser && !userViewOn && !restViewOn">
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label class="small center-block text-center">Full Name</label>
-                    <input style="text-transform: capitalize;" type="text" name="firstName" [(ngModel)]="userRegisterObj.fname" />
-                    <!-- <div *ngIf="f.submitted && !firstName.valid" class="help-block text-center">First Name is required</div> -->
+                  <div class="col-xl-12 input-wrap row justify-content-md-center d-flex flexContain">
+                    <div class="col-xl-6">
+                      <label class="small center-block text-center">Full Name</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInputCaptalize registerInput" type="text" name="firstName" [(ngModel)]="userRegisterObj.fname" />
+                    </div>
+                    
                   </div>
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label for="lastName" class="small center-block text-center">User Id</label>
-                    <input type="text" name="lastName" [(ngModel)]="userRegisterObj.userId" />
-                    <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
-                                                                                                                         [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label for="lastName" class="small center-block text-center">User Id</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInput" type="text" name="lastName" [(ngModel)]="userRegisterObj.userId" />
+                    </div>
+
                   </div>
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label for="lastName" class="small center-block text-center">User Type</label>
-                    <select name="userTypeSelect" [(ngModel)]="userRegisterObj.type">
-                      <option disabled>Select User Type</option>
-                      <option *ngFor="let userType of userTypeOption" [value]="userType.id">{{userType.name}}</option>
-                    </select>
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label for="lastName" class="small center-block text-center">User Type</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <select name="userTypeSelect" [(ngModel)]="userRegisterObj.type" class="registerSelect">
+                        <option disabled>Select User Type</option>
+                        <option *ngFor="let userType of userTypeOption" [value]="userType.id">{{userType.name}}</option>
+                      </select>
+                    </div>
+
                   </div>
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
-                    <input style="text-transform: capitalize;" type="text" name="token" [(ngModel)]="userRegisterObj.token" />
-                    <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div> [ngValue]="userType.id" -->
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInputCaptalize registerInput" type="text" name="token" [(ngModel)]="userRegisterObj.token" />
+                    </div>
+
                   </div>
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <button type="submit" [disabled]="loading" (click)="registerUser()"
-                      class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img *ngIf="loading"
+                      class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img
+                        *ngIf="loading"
                         src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
                     </button>
                   </div>
                 </ng-container>
-              
+
                 <ng-container *ngIf="registerAsRestaurant && !userViewOn && !restViewOn">
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label class="small center-block text-center">Restaurant Name</label>
-                    <input style="text-transform: capitalize;" type="text" name="firstName"
-                      [(ngModel)]="restaurantRegisterObj.name" />
-                    <!-- <div *ngIf="f.submitted && !firstName.valid" class="help-block text-center">First Name is required</div> -->
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label class="small center-block text-center">Restaurant Name</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInputCaptalize registerInput" type="text" name="firstName" [(ngModel)]="restaurantRegisterObj.name" />
+                    </div>
+                    
                   </div>
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label for="lastName" class="small center-block text-center">Restaurant Id</label>
-                    <input type="text" name="lastName" [(ngModel)]="restaurantRegisterObj.id" />
-                    <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div>
-                                                                                                                                       [(ngModel)]="model.lastName" #lastName="ngModel" (blur)="model.lastName = model.lastName.trim()" required -->
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label for="lastName" class="small center-block text-center">Restaurant Id</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInput" type="text" name="lastName" [(ngModel)]="restaurantRegisterObj.id" />
+                    </div>
+                    
                   </div>
-                  <div class="input-wrap row justify-content-md-center d-flex">
-                    <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
-                    <input type="text" name="token" [(ngModel)]="restaurantRegisterObj.token" />
-                    <!-- <div *ngIf="f.submitted && !lastName.valid" class="help-block text-center">Last Name is required</div> [ngValue]="userType.id" -->
+                  <div class="col-xl-12 flexContain input-wrap row justify-content-md-center d-flex">
+                    <div class="col-xl-6">
+                      <label for="lastName" class="small center-block text-center">Token Amount to Stake</label>
+                    </div>
+                    <div class="col-xl-6">
+                      <input class="registerInput" type="text" name="token" [(ngModel)]="restaurantRegisterObj.token" />
+                    </div>
+                    
                   </div>
                   <div class="input-wrap row justify-content-md-center d-flex">
                     <button type="submit" [disabled]="loading" (click)="registerRestaurant()"
-                      class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img *ngIf="loading"
+                      class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img
+                        *ngIf="loading"
                         src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
                     </button>
                   </div>
@@ -229,13 +258,13 @@
                         </div>
                       </ng-container>
                     </div>
-              
+
                   </ng-container>
                 </ng-container>
                 <!----Order Confirmation Screen----------------------->
                 <ng-container *ngIf="userViewOn && orderConfirmationScreen">
                   <div class="container">
-              
+
                     <div class="col-xl-12 orderConfirmationTitleAlign">
                       <button class="btn btn-secondary" (click)="navBackToMenuScreen()">
                         Return to Menu
@@ -250,7 +279,7 @@
                         Price
                       </div>
                     </div>
-              
+
                     <ng-container *ngFor="let item of menuItemArray; let i = index">
                       <ng-container *ngIf="item.isSelected">
                         <div class="col-xl-12 flexContain restarantOrderAlign">
@@ -264,36 +293,33 @@
                       </ng-container>
                     </ng-container>
                   </div>
-              
-                  <ng-container>
-                    <div class="col-xl-12 flexContain">
-                      <div class="col-xl-5"></div>
-                      <div class="col-xl-5">Total</div>
-                      <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.total}}</div>
-                    </div>
-                    <div class="col-xl-12 flexContain">
-                      <div class="col-xl-5"></div>
-                      <div class="col-xl-5">Service Fee</div>
-                      <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.serviceFee}}</div>
-                    </div>
-                    <div class="col-xl-12 flexContain">
-                      <div class="col-xl-5"></div>
-                      <div class="col-xl-5">Network Fee</div>
-                      <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.networkFee}}</div>
-                    </div>
-                    <div class="col-xl-12 flexContain">
-                      <div class="col-xl-5"></div>
-                      <div class="col-xl-5">Final Price </div>
-                      <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.final}}</div>
-                    </div>
-                    <div class="col-xl-12 flexContain">
-                      <button class="btn btn-primary" (click)="placeOrder()">
-                        Place Order
-                      </button>
-                    </div>
-                  </ng-container>
+                  <div class="col-xl-12 flexContain">
+                    <div class="col-xl-5"></div>
+                    <div class="col-xl-5">Total</div>
+                    <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.total}}</div>
+                  </div>
+                  <div class="col-xl-12 flexContain">
+                    <div class="col-xl-5"></div>
+                    <div class="col-xl-5">Service Fee</div>
+                    <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.serviceFee}}</div>
+                  </div>
+                  <div class="col-xl-12 flexContain">
+                    <div class="col-xl-5"></div>
+                    <div class="col-xl-5">Network Fee</div>
+                    <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.networkFee}}</div>
+                  </div>
+                  <div class="col-xl-12 flexContain">
+                    <div class="col-xl-5"></div>
+                    <div class="col-xl-5">Final Price </div>
+                    <div class="col-xl-2 restaurantOrderPrice">{{orderTotals.final}}</div>
+                  </div>
+                  <div class="col-xl-12 flexContain">
+                    <button class="btn btn-primary" (click)="placeOrder()">
+                      Place Order
+                    </button>
+                  </div>
                 </ng-container>
-              
+
                 <ng-container *ngIf="userOrdersView">
                   <ng-container *ngIf="userOrdersListView">
                     <ng-container *ngIf="userOrderViewArry.length == 0">
@@ -327,7 +353,7 @@
                               <div class="col-xl-3 userOrderPrice">{{order.ethTotal}}</div>
                               <div class="col-xl-3">
                                 <ng-container *ngIf="order.status == 'Delivered'">
-                                  <button class="btn btn-secondary" (click)="payOrderView(order.orderId)">Pay Order</button>
+                                  <button class="btn btn-secondary" (click)="payOrderView(order)">Pay Order</button>
                                 </ng-container>
                               </div>
                             </div>
@@ -339,152 +365,186 @@
 
                   <ng-container *ngIf="payOrderScreenOn">
                     <div class="container">
-                  
+
                       <div class="col-xl-12 orderConfirmationTitleAlign">
                         <button class="btn btn-secondary" (click)="navBackToConfirmationScreen()">
                           Return to Orders
                         </button>
                         <h2>Pay Order</h2>
                       </div>
-                      <div>{{payOrderObj.orderId}}</div>
-                      <div>{{payOrderObj.total}}</div>
-                    </div>
-                      
-                  </ng-container>
-
-                </ng-container>
-              </ng-container>
-              
-              <ng-container *ngIf="driverViewOn">
-                <ng-container *ngIf="driverViewOn">
-                  <ng-container *ngIf="driverOrderViewArry.length == 0">
-                    <h5 id="driverViewOrders">No Orders found.</h5>
-                  </ng-container>
-                  <ng-container *ngFor="let order of driverOrderViewArry">
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="DriverView">
-                        <button class="accordion-button" [ngClass]="{collapsed: order.isSelected}" type="button"
-                          (click)="order.isSelected = !order.isSelected">
-                          <div class="col-xl-3">{{order.orderId}}</div>
-                          <div class="col-xl-8 userOrderTitleStatus">{{order.status}}</div>
-                        </button>
-                      </h2>
-                      <div id="collapseOne" class="accordion-collapse collapse show">
-                        <div class="accordion-body" *ngIf="order.isSelected">
-                          <div class="flexContain">
-                            <div class="col-xl-6"> Items</div>
-                            <div class="col-xl-3 userOrderPrice"> Total</div>
-                            <div class="col-xl-3"></div>
-                          </div>
-                          <ng-container *ngFor="let item of order.items">
-                            <div class="flexContain">
-                              <div class="col-xl-6">{{item}}</div>
-                              <div class="col-xl-3"></div>
-                              <div class="col-xl-3"></div>
-                            </div>
-                          </ng-container>
-                          <div class="flexContain">
-                            <div class="col-xl-6"></div>
-                            <div class="col-xl-3 userOrderPrice">{{order.ethTotal}}</div>
-                            <div class="col-xl-3">
-                              <ng-container *ngIf="order.driverAddress == '0x0000000000000000000000000000000000000000'">
-                                <button class="btn btn-secondary" (click)="assignToDriver(order.orderId)">Assign To Driver</button>
-                              </ng-container>
-                              <ng-container *ngIf="order.driverAddressLC === currentAccount && order.status != 'Delivered'">
-                                <button class="btn btn-secondary" (click)="driverDelivered(order.orderId)">Set to Delivered</button>
-                              </ng-container>
-                              <ng-container *ngIf="order.driverAddressLC != currentAccount">
-                                <button class="btn btn-secondary">Assigned to another driver</button>
-                              </ng-container>
-                              <ng-container>
-                
-                              </ng-container>
-                            </div>
-                          </div>
+                      <div class="col-xl-12 flexContain">
+                        <div class="leftDiv"> Order Id: </div>
+                        <div class="rightDiv">{{payOrderObj.orderId}}</div>
+                      </div>
+                      <div class="col-xl-12 flexContain ">
+                        <div class="leftDiv"> Total: </div>
+                        <div class="rightDiv">{{payOrderObj.total}}</div>
+                      </div>
+                      <div class="col-xl-12 flexContain">
+                        <div class="col-xl-6"> Restaurant Rating</div>
+                        <div class="col-xl-6">Driver Rating</div>
+                      </div>
+                      <div class="col-xl-12 flexContain">
+                        <div class="col-xl-6">
+                          <input name="restRating" [(ngModel)]="payOrderObj.restRating" placeholder="Enter rating of 0 to 5"/>
                         </div>
+                        <div class="col-xl-6">
+                          <input name="driverRating" [(ngModel)]="payOrderObj.driverRating" placeholder="Enter rating of 0 to 5"/>
+                        </div>
+                      </div>
+                      <div class="col-xl-12 flexContain">
+                        <div class="col-xl-5">Driver Tip</div>
+                        <div class="col-xl-2"> or</div>
+                        <div class="col-xl-5">Driver Token Tip</div>
+                      </div>
+                      <div class="col-xl-12 flexContain">
+                        <div class="col-xl-6">
+                          <input type="text" name="driverTip" [(ngModel)]="payOrderObj.driverTip" />
+                        </div>
+                        <div class="col-xl-6">
+                          <input type="text" name="tokenTip" [(ngModel)]="payOrderObj.tokenTip"/>
+                        </div>
+                      </div>
+                      <div class="col-xl-12 payOrderButtonCenter">
+                        <button type="button" class="btn btn-secondary payOrderButtonAlign" (click)="orderDeliveryConfirm()"> Pay Order</button>
                       </div>
                     </div>
                   </ng-container>
                 </ng-container>
-              </ng-container>
-              
-              <ng-container *ngIf="restViewOn">
-                <div class="container flexContain">
-                  <div class="leftDiv col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
-                    <button type="submit" [disabled]="loading" (click)="addMenuItemsView()"
-                      class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Add
-                      Menu Item <img *ngIf="loading"
-                        src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                    </button>
-                    <button type="submit" [disabled]="restViewObj.items == 0" (click)="getRestaurantMenuView()"
-                      class=" restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Get
-                      Menu <img *ngIf="loading"
-                        src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                    </button>
-                  </div>
-                  <div class=" rightDiv col-xl-9 col-lg-3 col-md-12 col-sm-12 col-12">
-                    <ng-container *ngIf="addingMenuItem">
-                      <div class="addMenuTitle">
-                        <h4 class="card-title">Add Menu Item</h4>
-                      </div>
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Name: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
-                            [(ngModel)]="menuItemRegisterObj.name" />
-                        </div>
-                      </div>
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Type: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <select class="addMenuInput" name="itemTypeSelect" [(ngModel)]="menuItemRegisterObj.type">
-                            <option selected disabled>Select Item Type</option>
-                            <option *ngFor="let itemType of menuItemType" [value]="itemType.id">{{itemType.name}}
-                            </option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <div class="col-xl-3">
-                          <label class="center-block text-center">Item Price: </label>
-                        </div>
-                        <div class="col-xl-6">
-                          <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
-                            [(ngModel)]="menuItemRegisterObj.price" />
-                        </div>
-                      </div>
-                      <div class="input-wrap row justify-content-md-center d-flex">
-                        <button type="submit" [disabled]="loading" (click)="createRestaurantMenuItem()"
-                          class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img *ngIf="loading"
-                            src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                        </button>
-                      </div>
-                    </ng-container>
-                    <ng-container *ngIf="showingMenu">
-                      <div class="addMenuTitle">
-                        <h4 class="card-title">Menu Item</h4>
-                      </div>
-                      <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
-                        <div class="col-xl-4 showMenuTitle">Name</div>
-                        <div class="col-xl-4 showMenuTitle">Type</div>
-                        <div class="col-xl-4 showMenuTitle">Price</div>
-                      </div>
-                      <ng-container *ngFor="let item of menuItemArray">
-                        <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
-                          <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemName}}</div>
-                          <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemType}}</div>
-                          <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemPrice}}</div>
-                        </div>
-                      </ng-container>
-                    </ng-container>
-                  </div>
-                </div>
               </ng-container>
             </div>
+
+            <ng-container *ngIf="driverViewOn">
+              <ng-container *ngIf="driverViewOn">
+                <ng-container *ngIf="driverOrderViewArry.length == 0">
+                  <h5 id="driverViewOrders">No Orders found.</h5>
+                </ng-container>
+                <ng-container *ngFor="let order of driverOrderViewArry">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="DriverView">
+                      <button class="accordion-button" [ngClass]="{collapsed: order.isSelected}" type="button"
+                        (click)="order.isSelected = !order.isSelected">
+                        <div class="col-xl-3">{{order.orderId}}</div>
+                        <div class="col-xl-8 userOrderTitleStatus">{{order.status}}</div>
+                      </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show">
+                      <div class="accordion-body" *ngIf="order.isSelected">
+                        <div class="flexContain">
+                          <div class="col-xl-6"> Items</div>
+                          <div class="col-xl-3 userOrderPrice"> Total</div>
+                          <div class="col-xl-3"></div>
+                        </div>
+                        <ng-container *ngFor="let item of order.items">
+                          <div class="flexContain">
+                            <div class="col-xl-6">{{item}}</div>
+                            <div class="col-xl-3"></div>
+                            <div class="col-xl-3"></div>
+                          </div>
+                        </ng-container>
+                        <div class="flexContain">
+                          <div class="col-xl-6"></div>
+                          <div class="col-xl-3 userOrderPrice">{{order.ethTotal}}</div>
+                          <div class="col-xl-3">
+                            <ng-container *ngIf="order.driverAddress == '0x0000000000000000000000000000000000000000'">
+                              <button class="btn btn-secondary" (click)="assignToDriver(order.orderId)">Assign To
+                                Driver</button>
+                            </ng-container>
+                            <ng-container
+                              *ngIf="order.driverAddressLC === currentAccount && order.status != 'Delivered'">
+                              <button class="btn btn-secondary" (click)="driverDelivered(order.orderId)">Set to
+                                Delivered</button>
+                            </ng-container>
+                            <ng-container
+                              *ngIf="order.driverAddress != '0x0000000000000000000000000000000000000000' && order.driverAddressLC != currentAccount">
+                              <button class="btn btn-secondary">Assigned to another driver</button>
+                            </ng-container>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+
+            <ng-container *ngIf="restViewOn">
+              <div class="container flexContain">
+                <div class="leftDiv col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+                  <button type="submit" [disabled]="loading" (click)="addMenuItemsView()"
+                    class="restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Add
+                    Menu Item <img *ngIf="loading"
+                      src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                  </button>
+                  <button type="submit" [disabled]="restViewObj.items == 0" (click)="getRestaurantMenuView()"
+                    class=" restaurantMenuBtn btn btn-primary next-button row justify-content-md-center d-flex">Get
+                    Menu <img *ngIf="loading"
+                      src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                  </button>
+                </div>
+                <div class=" rightDiv col-xl-9 col-lg-3 col-md-12 col-sm-12 col-12">
+                  <ng-container *ngIf="addingMenuItem">
+                    <div class="addMenuTitle">
+                      <h4 class="card-title">Add Menu Item</h4>
+                    </div>
+                    <div class="input-wrap row justify-content-md-center d-flex">
+                      <div class="col-xl-3">
+                        <label class="center-block text-center">Item Name: </label>
+                      </div>
+                      <div class="col-xl-6">
+                        <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
+                          [(ngModel)]="menuItemRegisterObj.name" />
+                      </div>
+                    </div>
+                    <div class="input-wrap row justify-content-md-center d-flex">
+                      <div class="col-xl-3">
+                        <label class="center-block text-center">Item Type: </label>
+                      </div>
+                      <div class="col-xl-6">
+                        <select class="addMenuInput" name="itemTypeSelect" [(ngModel)]="menuItemRegisterObj.type">
+                          <option selected disabled>Select Item Type</option>
+                          <option *ngFor="let itemType of menuItemType" [value]="itemType.id">{{itemType.name}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="input-wrap row justify-content-md-center d-flex">
+                      <div class="col-xl-3">
+                        <label class="center-block text-center">Item Price: </label>
+                      </div>
+                      <div class="col-xl-6">
+                        <input class="addMenuInput" style="text-transform: capitalize;" type="text" name="firstName"
+                          [(ngModel)]="menuItemRegisterObj.price" />
+                      </div>
+                    </div>
+                    <div class="input-wrap row justify-content-md-center d-flex">
+                      <button type="submit" [disabled]="loading" (click)="createRestaurantMenuItem()"
+                        class="btn btn-primary next-button row justify-content-md-center d-flex">Register <img
+                          *ngIf="loading"
+                          src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                      </button>
+                    </div>
+                  </ng-container>
+                  <ng-container *ngIf="showingMenu">
+                    <div class="addMenuTitle">
+                      <h4 class="card-title">Menu Item</h4>
+                    </div>
+                    <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
+                      <div class="col-xl-4 showMenuTitle">Name</div>
+                      <div class="col-xl-4 showMenuTitle">Type</div>
+                      <div class="col-xl-4 showMenuTitle">Price</div>
+                    </div>
+                    <ng-container *ngFor="let item of menuItemArray">
+                      <div class="col-xl-12 col-lg-3 col-md-12 col-sm-12 col-12 flexContain">
+                        <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemName}}</div>
+                        <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemType}}</div>
+                        <div class="col-xl-4 userViewMenuItemsTextAlign">{{item.itemPrice}}</div>
+                      </div>
+                    </ng-container>
+                  </ng-container>
+                </div>
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>
