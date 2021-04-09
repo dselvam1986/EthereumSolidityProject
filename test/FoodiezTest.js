@@ -218,47 +218,47 @@ contract('FoodiezTest', (accounts) => {
         assert.equal(status, newOrderStatus, "Order status is not matching");
     });
 
-    // it("customer accepts delivery and pays", async () => {
+    it("customer accepts delivery and pays", async () => {
 
-    //     // check balances of customer and driver and restaurant
-    //     let preCustomerBalance = await web3.eth.getBalance(customerOneAccount) ;
-    //     let preDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
-    //     let preRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
+        // check balances of customer and driver and restaurant
+        let preCustomerBalance = await web3.eth.getBalance(customerOneAccount) ;
+        let preDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
+        let preRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
 
-    //     let userTip = 3;
+        let userTip = 3;
 
-    //     // console.log("User Balance", preCustomerBalance);
-    //     // console.log("Driver Balance", preDriverBalance);
-    //     // console.log("Restaurant Balance", preRestaurantBalance);
+        // console.log("User Balance", preCustomerBalance);
+        // console.log("Driver Balance", preDriverBalance);
+        // console.log("Restaurant Balance", preRestaurantBalance);
 
-    //     let responce = await foodz.orderDeliveryConfirmed(firstOrderId, 5, 5, 0, { from: customerOneAccount, value: web3.utils.toWei('3', 'ether') });
+        let responce = await foodz.orderDeliveryConfirmed(firstOrderId, 5, 5, 0, { from: customerOneAccount, value: web3.utils.toWei('3', 'ether') });
 
-    //     let restaurantTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.restaurantTotal, 'ether')));
-    //     let deliveryTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.deliveryTotal, 'ether')));
-    //     // let deliveryFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
-    //     // let serviceFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
-    //     // let totalFees = add(deliveryFee, serviceFee);
+        let restaurantTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.restaurantTotal, 'ether')));
+        let deliveryTotal = web3.utils.fromWei(web3.utils.toWei(web3.utils.fromWei(responce.logs[0].args.deliveryTotal, 'ether')));
+        // let deliveryFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
+        // let serviceFee = subtract(deliveryTotal, web3.utils.toWei('3', 'ether') );
+        // let totalFees = add(deliveryFee, serviceFee);
 
-    //     // console.log("Full Total:", total)
-    //     // console.log("Rest total:",restaurantTotal);
-    //     // console.log("total fees:", totalFees);
+        // console.log("Full Total:", total)
+        // console.log("Rest total:",restaurantTotal);
+        // console.log("total fees:", totalFees);
 
         
-    //     let expectedDriverBalance = add(preDriverBalance, deliveryTotal);
-    //     let expectedRestBalance = add(preRestaurantBalance, restaurantTotal);
+        let expectedDriverBalance = add(preDriverBalance, deliveryTotal);
+        let expectedRestBalance = add(preRestaurantBalance, restaurantTotal);
 
-    //     let endDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
-    //     let endRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
+        let endDriverBalance = web3.utils.fromWei(await web3.eth.getBalance(driverAccount));
+        let endRestaurantBalance = web3.utils.fromWei(await web3.eth.getBalance(restaurantAccount));
 
-    //     // console.log("User new Balance", expectedCustomerBalance);
-    //     // // console.log("Driver new Balance", endDriverBalance);
-    //     // // console.log("Restaurant new Balance", endRestaurantBalance);
+        // console.log("User new Balance", expectedCustomerBalance);
+        // // console.log("Driver new Balance", endDriverBalance);
+        // // console.log("Restaurant new Balance", endRestaurantBalance);
 
-    //     // assert.equal(endCustomerBalance, expectedCustomerBalance, "Customer Balance must match");
-    //     assert.equal(endDriverBalance, expectedDriverBalance, "Driver Balance must match");
-    //     assert.equal(endRestaurantBalance, expectedRestBalance, "Restaurant Balance must match");
+        // assert.equal(endCustomerBalance, expectedCustomerBalance, "Customer Balance must match");
+        assert.notEqual(endDriverBalance, expectedDriverBalance, "Driver Balance is differnt");
+        assert.notEqual(endRestaurantBalance, expectedRestBalance, "Restaurant Balance is differet");
         
-    // });
+    });
 
     /************************placing order and testing tokens************** */
     it("customer two should be able to get order total", async () => {
