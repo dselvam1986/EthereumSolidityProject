@@ -1,6 +1,7 @@
 const Foodiez = artifacts.require('Foodiez');
 const FoodiezToken = artifacts.require('FoodiezToken');
 const FoodiezHelpers = artifacts.require('FoodiezHelpers');
+const FoodiezRegister = artifacts.require('FoodiezRegistration');
 const AssertionError = require('assertion-error');
 const { iteratee, subtract, add } = require('lodash');
 const truffleAssert = require('truffle-assertions');
@@ -25,6 +26,7 @@ contract('FoodiezTest', (accounts) => {
 
     beforeEach(async () => {
         foodz = await Foodiez.deployed();
+        register = await FoodiezRegister.deployed();
         token = await FoodiezToken.deployed();
         helper = await FoodiezHelpers.deployed();
 
@@ -43,8 +45,35 @@ contract('FoodiezTest', (accounts) => {
         assert.equal(responce, "5", "Unit to string not working");
     });
 
-    it("should register a new customer from userAccount", async () => {
+    // calling register function with invalid data
+    it("should throw error when register a new customer with wrong data", async () => {
+        
+        // await truffleAssert.reverts(
+        //     foodz.userRegister("Dino Sel", 0, 0, { from: customerOneAccount }), null,
+        //     "Invalid as correct params are not sent"
+        // );
+        await foodz.userRegister("Dino Sel", 0, 0, { from: customerOneAccount }).then( (result)=>{
+            console.log(result);
+        }).catch((error)=>{
+            // console.log("error", error);
+            assert.equal(error.code, 'INVALID_ARGUMENT', "Throws Invalid argument for missing value");
+        });
+    });
+
+    // when calling function with modifier OnlyParent
+    it("should throw error when calling function with modifier OnlyParent", async () => {
+        await truffleAssert.reverts(
+            register.getTotalRestaurants({ from: customerOneAccount }), null, "revert is called becuase function has modifier OnlyParent"
+        );
+    });
+
+    //event emit capture after successfull user registration
+    it("should register a new customer from userAccount and capture event with correct values", async () => {
         let responce = await foodz.userRegister("Dino Sel", "dino", 0, 0, { from: customerOneAccount });
+
+        await truffleAssert.eventEmitted(
+            responce, 'UserRegisteredEvent', (ev) => { return ev.userName === 'Dino Sel' && ev.isRegistered == true },
+            "Event should return with correct values.");
 
         // now retrieve the data. 
         var expectedName = "Dino Sel";

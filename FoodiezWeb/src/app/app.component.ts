@@ -402,7 +402,7 @@ export class AppComponent {
       if (result.status != undefined) {
         console.log(result);
         // reset obj
-        this.resetRegisterObj(3);
+        this.resetRegisterObj(4);
         this.checkAddressRegistration(result.from);
       } else {
         // error
